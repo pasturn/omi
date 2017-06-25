@@ -10,12 +10,7 @@
 
 ### omi.lite.js
 
-移除了模板引擎的omi.js。你可以重写Omi.render去使用任意模板引擎。
-
-### omi_server.js
-
-用于服务端直出或者同构直出。
-  
+不包含 mustache.js 模板引擎的 omi.js 。你可以重写 Omi.template 去使用任意模板引擎。
 
 ## Explanation of Build Files
 
@@ -26,8 +21,4 @@ The full UMD build.
 
 ### omi.lite.js
 
-Same as omi.js but without template engine.
-
-### omi_server.js
-
-This is used for server-side rendering.
+Same as omi.js but without mustache.js template engine.

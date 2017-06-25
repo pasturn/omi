@@ -1,28 +1,36 @@
-﻿# Omi使用文档
-* [安装](./cn_installation.md)
-* [Hello World](./cn_hello_world.md)
-* [组件](./cn_components.md)
-* [组件通讯](./cn_communication.md)
-* [生命周期](./cn_lifecycle.md)
-* [事件处理](./cn_events.md)
-* [条件判断](./cn_condition.md)
-* [循环遍历](./cn_loop.md)
-* [表单](./cn_form.md)
-* [继承](./cn_inhrit.md)
-* [模板切换](./cn_template.md)
-* [获取DOM节点](./cn_get_dom.md)
-* [插件体系](./cn_plugin.md)
-* [Omi理念](./cn_thinking_in_omi.md)
+## [Docs All in One](https://github.com/AlloyTeam/omi/blob/master/tutorial/all.md)
 
-# 从零一步步打造Web组件化框架Omi
+### Usage
+* [安装](./src/docs/cn/installation.md)
+* [Hello World](./src/docs/cn/hello_world.md)
+* [组件](./src/docs/cn/components.md)
+* [组件通讯](./src/docs/cn/communication.md)
+* [生命周期](./src/docs/cn/lifecycle.md)
+* [Store体系](./src/docs/cn/store.md)
+* [事件处理](./src/docs/cn/events.md)
+* [条件判断](./src/docs/cn/condition.md)
+* [循环遍历](./src/docs/cn/loop.md)
+* [表单](./src/docs/cn/form.md)
+* [继承](./src/docs/cn/inherit.md)
+* [模板切换](./src/docs/cn/template.md)
+* [获取DOM节点](./src/docs/cn/get_dom.md)
+* [插件体系](./src/docs/cn/plugin.md)
+* [Omi理念](./src/docs/cn/thinking_in_omi.md)
 
-（待续...）
+### Usage(en-us)
+* [installation](./src/docs/en/installation.md)
+* [Hello World](./src/docs/en/hello_world.md)
+* [components](./src/docs/en/components.md)
+* [communication](./src/docs/en/communication.md)
+* [lifecycle](./src/docs/en/lifecycle.md)
+* [events](./src/docs/en/events.md)
+* [condition](./src/docs/en/condition.md)
+* [loop](./src/docs/en/loop.md)
+* [form](./src/docs/en/form.md)
+* [inherit](./src/docs/en/inherit.md)
+* [template](./src/docs/en/template.md)
+* [get dom](./src/docs/en/get_dom.md)
+* [plugin](./src/docs/en/plugin.md)
+* [thinking_in_omi](./src/docs/en/thinking_in_omi.md)
 
-* [环境搭建](./cn_pr_env.md)
-* [Hello Omi](./cn_pr_hello.md)
-* 局部CSS揭秘
-* 组件嵌套揭秘
-* 事件处理揭秘
-* 服务器端渲染揭秘
-* 模板切换揭秘
-* 容器系统揭秘
+

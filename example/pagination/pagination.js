@@ -6,7 +6,7 @@ class Pagination extends Omi.Component {
             total: 0,
             pageSize: 10,
             numDisplay: 10,
-            currentPage: 3,
+            currentPage: 0,
             numEdge: 0,
             linkTo: "#",
             prevText: "Prev",
@@ -19,17 +19,16 @@ class Pagination extends Omi.Component {
         super(data);
     }
 
-    install () {
+    beforeRender () {
         this.pageNum = Math.ceil(this.data.total / this.data.pageSize);
     }
 
     goto (index,evt) {
         evt.preventDefault();
         this.data.currentPage=index;
-        this.update();
         this.data.onPageChange(index);
-
     }
+
     style(){
         return `
     .pagination a {

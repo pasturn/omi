@@ -1,11 +1,17 @@
-import Omi from './omi.js';
-import Component from './component.js';
+import Omi from './omi.js'
+import Component from './component.js'
+import Store from './store.js'
 
 Omi.template = function(tpl, data){
-    return tpl;
+    return tpl
 }
 
-Omi.Component = Component;
+Omi.Store = Store
+Omi.Component = Component
 
-window.Omi=Omi;
-module.exports = Omi;
+if(window.Omi){
+    module.exports = window.Omi
+}else {
+    window.Omi = Omi
+    module.exports = Omi
+}

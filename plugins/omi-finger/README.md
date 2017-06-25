@@ -20,7 +20,7 @@ npm install omi-finger
 
 ```js
 import Omi from 'omi';
-import OmiFinger from '../../omi-finger.js';
+import OmiFinger from 'omi-finger';
 
 OmiFinger.init();
 
@@ -40,7 +40,7 @@ class App extends Omi.Component {
     render() {
         return  `
         <div>
-            <div omi-finger ref="touchArea" onTap="handleTap"  onSwipe="handleSwipe" >
+            <div omi-finger ref="touchArea" tap="handleTap"  swipe="handleSwipe" >
                 Tap or Swipe Me!
             </div>
         </div>

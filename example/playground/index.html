@@ -23,57 +23,52 @@
         <div class="editor">
       <textarea id="editor">
 class List extends Omi.Component {
-    constructor(data) {
-        super(data);
-    }
-
     render () {
-        return `<ul> {{#items}} <li>{{.}}</li> {{/items}}</ul>`;
+        return `<ul>
+          <li o-repeat="item in items">{{item}}</li>
+      </ul>`;
     }
 }
 
-Omi.makeHTML('List', List);
+Omi.tag('list', List)
 
 class Todo extends Omi.Component {
     constructor(data) {
         super(data);
-        this.data.length = this.data.items.length;
-        this.listData = { items : this.data.items } ;
     }
 
     add (evt) {
-        evt.preventDefault();
-        this.list.data.items.push(this.data.text);
-        this.data.length = this.list.data.items.length;
-        this.data.text = '';
-        this.update();
+        evt.preventDefault()
+        this.data.items.push(this.data.text)
+        this.data.text = ''
+        this.update()
     }
 
     style () {
         return `
         h3 { color:red; }
-        button{ color:green;}`;
+        button{ color:green;}`
     }
 
     handleChange(target){
-        this.data.text = target.value;
+        this.data.text = target.value
     }
 
     render () {
         return `
       <div>
           <h3>TODO</h3>
-          <List name="list" data="listData" />
-          <form onsubmit="add(event)" >
-              <input type="text" onchange="handleChange(this)"  value="{{text}}"  />
-              <button>Add #{{length}}</button>
+          <list ::data-items="data.items"></list>
+          <form onsubmit="add" >
+              <input type="text" onchange="handleChange(this)" value="{{text}}" />
+              <button>Add #${ this.data.items.length }</button>
           </form>
-      </div>`;
+      </div>`
     }
 }
 
 
-Omi.render(new Todo({ items: ['Omi','dntzhang','AlloyTeam'] , text : '' }),'#container');</textarea>
+Omi.render(new Todo({ items: ['Omi','dntzhang','AlloyTeam'] , text : '' }),'#container')</textarea>
         </div>
     </div>
 
@@ -92,7 +87,7 @@ Omi.render(new Todo({ items: ['Omi','dntzhang','AlloyTeam'] , text : '' }),'#con
 
     editor.on("changes",function(a){
         var b=a.getValue();compile(b),localStorage.setItem(storageKey,b);
-        window.history.pushState({a:1}, "My Profile", "http://alloyteam.github.io/omi/example/playground/index.html?code="+encodeURIComponent(b));}
+        window.history.pushState({a:1}, "My Profile",window.location.protocol + "//alloyteam.github.io/omi/example/playground/index.html?code="+encodeURIComponent(b));}
     );
 </script>
 </body>

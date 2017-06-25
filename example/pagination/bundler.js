@@ -42,7 +42,7 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -52,11 +52,11 @@
 
 	var _index2 = _interopRequireDefault(_index);
 
-	var _pagination = __webpack_require__(9);
+	var _pagination = __webpack_require__(11);
 
 	var _pagination2 = _interopRequireDefault(_pagination);
 
-	var _content = __webpack_require__(10);
+	var _content = __webpack_require__(12);
 
 	var _content2 = _interopRequireDefault(_content);
 
@@ -68,8 +68,8 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	_index2['default'].makeHTML('Pagination', _pagination2['default']);
-	_index2['default'].makeHTML('Content', _content2['default']);
+	_index2['default'].tag('pagination', _pagination2['default']);
+	_index2['default'].tag('content', _content2['default']);
 
 	var Main = function (_Omi$Component) {
 	    _inherits(Main, _Omi$Component);
@@ -81,19 +81,18 @@
 	    }
 
 	    _createClass(Main, [{
-	        key: 'installed',
-	        value: function installed() {
-	            this.content.goto(this.pagination.data.currentPage + 1);
-	        }
-	    }, {
 	        key: 'handlePageChange',
 	        value: function handlePageChange(index) {
 	            this.content.goto(index + 1);
+	            this.update();
 	        }
+	    }, {
+	        key: 'xxx',
+	        value: function xxx() {}
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            return '<div>\n                    <h1>Pagination Example</h1>\n                    <Content name="content" />\n                    <Pagination\n                        name="pagination"\n                        data-total="100"\n                        data-page-size="10"\n                        data-num-edge="1"\n                        data-num-display="4"\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\n                        onPageChange="handlePageChange" />\n                </div>';
+	            return '<div>\n                    <h1>Pagination Example</h1>\n                    <content name="content" ></content>\n                    <pagination\n                        name="pagination"\n                        :data-total="100"\n                        :data-page-size="10"\n                        :data-num-edge="1"\n                        :data-num-display="4"\n                        on-page-change="handlePageChange" ></pagination>\n                </div>';
 	        }
 	    }]);
 
@@ -102,9 +101,9 @@
 
 	_index2['default'].render(new Main(), 'body');
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -112,26 +111,36 @@
 
 	var _omi2 = _interopRequireDefault(_omi);
 
-	var _mustache = __webpack_require__(3);
+	var _soda = __webpack_require__(3);
 
-	var _mustache2 = _interopRequireDefault(_mustache);
+	var _soda2 = _interopRequireDefault(_soda);
 
-	var _component = __webpack_require__(4);
+	var _component = __webpack_require__(5);
 
 	var _component2 = _interopRequireDefault(_component);
 
+	var _store = __webpack_require__(10);
+
+	var _store2 = _interopRequireDefault(_store);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	_omi2['default'].template = _mustache2['default'].render;
+	_soda2['default'].prefix('o');
 
+	_omi2['default'].template = _soda2['default'];
+
+	_omi2['default'].Store = _store2['default'];
 	_omi2['default'].Component = _component2['default'];
+	if (window.Omi) {
+	    module.exports = window.Omi;
+	} else {
+	    window.Omi = _omi2['default'];
+	    module.exports = _omi2['default'];
+	}
 
-	window.Omi = _omi2['default'];
-	module.exports = _omi2['default'];
-
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	"use strict";
 
@@ -148,6 +157,10 @@
 
 	Omi.STYLEPREFIX = "omi_style_";
 	Omi.STYLESCOPEDPREFIX = "omi_scoped_";
+
+	Omi.style = {};
+
+	Omi.componentConstructor = {};
 
 	//fix ie bug
 	if (typeof Object.assign != 'function') {
@@ -287,7 +300,7 @@
 	        u_setting = setting;
 	        u_parent = parent;
 	    }
-	    Omi[tagName] = function (parent) {
+	    Omi.componentConstructor[tagName] = function (parent) {
 	        _inherits(Obj, parent);
 
 	        function Obj(data, server) {
@@ -303,7 +316,27 @@
 
 	    Omi.customTags.push(tagName);
 
-	    return Omi[tagName];
+	    return Omi.componentConstructor[tagName];
+	};
+
+	Omi.createStore = function (option) {
+
+	    var Store = function (parent) {
+	        _inherits(Obj, parent);
+
+	        function Obj(data, isReady) {
+	            _classCallCheck(this, Obj);
+	            this.data = data;
+	            option.methods.install && option.methods.install.call(this);
+	            return _possibleConstructorReturn(this, (Obj.__proto__ || Object.getPrototypeOf(Obj)).call(this, data, isReady));
+	        }
+
+	        _createClass(Obj, toArr(option.methods));
+
+	        return Obj;
+	    }(Omi.Store);
+
+	    return new Store(option.data, true);
 	};
 
 	Omi.mixIndex = function (array, key) {
@@ -338,32 +371,52 @@
 	};
 
 	Omi.getClassFromString = function (str) {
-	    if (str.indexOf('.') !== 0) {
+	    if (str.indexOf('.') !== -1) {
+	        //root is window
 	        var arr = str.split('.');
 	        var len = arr.length;
-	        var current = Omi[arr[0]];
+	        var current = window[arr[0]];
 	        for (var i = 1; i < len; i++) {
 	            current = current[arr[i]];
 	        }
 	        return current;
 	    } else {
-	        return Omi[str];
+	        return Omi.componentConstructor[str];
 	    }
 	};
 
-	//��ǰ��Component�ľ�̬�������Ƶ�omi��������Ȼmakehtml ��ie��child���ʲ������׵ľ�̬����
+	//以前是Component的静态方法，移到omi下来，不然makehtml 在ie下child访问不到父亲的静态方法
 	Omi.makeHTML = function (name, ctor) {
-	    Omi[name] = ctor;
-	    Omi.customTags.push(name);
+	    Omi.componentConstructor[name] = ctor;
+	    Omi.componentConstructor[name.toLowerCase()] = ctor;
+	    Omi.customTags.push(name, name.toLowerCase());
+	    if (document.documentMode < 9) {
+	        document.createElement(name.toLowerCase());
+	    }
 	};
 
-	Omi.render = function (component, renderTo, increment) {
+	Omi.tag = Omi.makeHTML;
+
+	Omi.render = function (component, renderTo, incrementOrOption) {
 	    component.renderTo = typeof renderTo === "string" ? document.querySelector(renderTo) : renderTo;
-	    component._omi_increment = increment;
+	    if (typeof incrementOrOption === 'boolean') {
+	        component._omi_increment = incrementOrOption;
+	    } else if (incrementOrOption) {
+	        component._omi_increment = incrementOrOption.increment;
+	        if (incrementOrOption.store) {
+	            if (incrementOrOption.store instanceof Omi.Store) {
+	                component.$store = incrementOrOption.store;
+	            } else {
+	                component.$store = Omi.createStore(incrementOrOption.store);
+	            }
+	        }
+	        component._omi_autoStoreToData = incrementOrOption.autoStoreToData;
+	    }
 	    component.install();
 	    component._render(true);
-	    component.installed();
 	    component._childrenInstalled(component);
+	    component.installed();
+	    component._execInstalledHandlers();
 	    return component;
 	};
 
@@ -422,627 +475,739 @@
 	    return data;
 	};
 
+	Omi.mixIndexToArray = function (arr, indexName) {
+	    arr.forEach(function (item, index) {
+	        item[indexName || 'index'] = index;
+	    });
+	};
+
+	Omi.deletePlugin = function (name) {
+	    delete Omi.plugins[name];
+	};
+
 	module.exports = Omi;
 
-/***/ },
+/***/ }),
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;'use strict';
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module) {'use strict';
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-	/*!
-	 * mustache.js - Logic-less {{mustache}} templates with JavaScript
-	 * http://github.com/janl/mustache.js
+	/**
+	 * sodajs v0.4.4 by dorsywang
+	 * Light weight but powerful template engine for JavaScript
+	 * Github: https://github.com/AlloyTeam/sodajs
+	 * MIT License
 	 */
 
-	/*global define: false Mustache: true*/
+	;(function () {
+	    if (!Array.prototype.map) {
+	        Array.prototype.map = function (func) {
+	            var arr = [];
+	            for (var i = 0; i < this.length; i++) {
+	                var item = this[i];
 
-	(function defineMustache(global, factory) {
-	    if (( false ? 'undefined' : _typeof(exports)) === 'object' && exports && typeof exports.nodeName !== 'string') {
-	        factory(exports); // CommonJS
-	    } else if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)); // AMD
-	    } else {
-	        global.Mustache = {};
-	        factory(global.Mustache); // script, wsh, asp
+	                [].push(func && func.call(item, item, i));
+	            }
+
+	            return arr;
+	        };
 	    }
-	})(undefined, function mustacheFactory(mustache) {
 
-	    var objectToString = Object.prototype.toString;
-	    var isArray = Array.isArray || function isArrayPolyfill(object) {
-	        return objectToString.call(object) === '[object Array]';
+	    if (!String.prototype.trim) {
+	        String.prototype.trim = function () {
+	            return this.replace(/^\s*|\s*$/g, '');
+	        };
+	    }
+
+	    var nodes2Arr = function nodes2Arr(nodes) {
+	        var arr = [];
+
+	        for (var i = 0; i < nodes.length; i++) {
+	            arr.push(nodes[i]);
+	        }
+
+	        return arr;
 	    };
 
-	    function isFunction(object) {
-	        return typeof object === 'function';
-	    }
+	    var valueoutReg = /\{\{([^\}]*)\}\}/g;
 
-	    /**
-	     * More correct typeof string handling array
-	     * which normally returns typeof 'object'
-	     */
-	    function typeStr(obj) {
-	        return isArray(obj) ? 'array' : typeof obj === 'undefined' ? 'undefined' : _typeof(obj);
-	    }
+	    var prefix = 'soda';
+	    var prefixReg = new RegExp('^' + prefix + '-');
 
-	    function escapeRegExp(string) {
-	        return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
-	    }
-
-	    /**
-	     * Null safe way of checking whether or not an object,
-	     * including its prototype, has a given property
-	     */
-	    function hasProperty(obj, propName) {
-	        return obj != null && (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object' && propName in obj;
-	    }
-
-	    // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
-	    // See https://github.com/janl/mustache.js/issues/189
-	    var regExpTest = RegExp.prototype.test;
-	    function testRegExp(re, string) {
-	        return regExpTest.call(re, string);
-	    }
-
-	    var nonSpaceRe = /\S/;
-	    function isWhitespace(string) {
-	        return !testRegExp(nonSpaceRe, string);
-	    }
-
-	    var entityMap = {
-	        '&': '&amp;',
-	        '<': '&lt;',
-	        '>': '&gt;',
-	        '"': '&quot;',
-	        "'": '&#39;',
-	        '/': '&#x2F;',
-	        '`': '&#x60;',
-	        '=': '&#x3D;'
+	    var classNameRegExp = function classNameRegExp(className) {
+	        return new RegExp('(^|\\s+)' + className + '(\\s+|$)', 'g');
 	    };
 
-	    function escapeHtml(string) {
-	        return String(string).replace(/[&<>"'`=\/]/g, function fromEntityMap(s) {
-	            return entityMap[s];
+	    var addClass = function addClass(el, className) {
+	        if (!el.className) {
+	            el.className = className;
+
+	            return;
+	        }
+
+	        if (el.className.match(classNameRegExp(className))) {} else {
+	            el.className += " " + className;
+	        }
+	    };
+
+	    var removeClass = function removeClass(el, className) {
+	        el.className = el.className.replace(classNameRegExp(className), "");
+	    };
+
+	    var getValue = function getValue(_data, _attrStr) {
+	        CONST_REGG.lastIndex = 0;
+	        var realAttrStr = _attrStr.replace(CONST_REGG, function (r) {
+	            if (typeof _data[r] === "undefined") {
+	                return r;
+	            } else {
+	                return _data[r];
+	            }
 	        });
-	    }
 
-	    var whiteRe = /\s*/;
-	    var spaceRe = /\s+/;
-	    var equalsRe = /\s*=/;
-	    var curlyRe = /\s*\}/;
-	    var tagRe = /#|\^|\/|>|\{|&|=|!/;
+	        if (_attrStr === 'true') {
+	            return true;
+	        }
 
-	    /**
-	     * Breaks up the given `template` string into a tree of tokens. If the `tags`
-	     * argument is given here it must be an array with two string values: the
-	     * opening and closing tags used in the template (e.g. [ "<%", "%>" ]). Of
-	     * course, the default is to use mustaches (i.e. mustache.tags).
-	     *
-	     * A token is an array with at least 4 elements. The first element is the
-	     * mustache symbol that was used inside the tag, e.g. "#" or "&". If the tag
-	     * did not contain a symbol (i.e. {{myValue}}) this element is "name". For
-	     * all text that appears outside a symbol this element is "text".
-	     *
-	     * The second element of a token is its "value". For mustache tags this is
-	     * whatever else was inside the tag besides the opening symbol. For text tokens
-	     * this is the text itself.
-	     *
-	     * The third and fourth elements of the token are the start and end indices,
-	     * respectively, of the token in the original template.
-	     *
-	     * Tokens that are the root node of a subtree contain two more elements: 1) an
-	     * array of tokens in the subtree and 2) the index in the original template at
-	     * which the closing tag for that section begins.
-	     */
-	    function parseTemplate(template, tags) {
-	        if (!template) return [];
+	        if (_attrStr === 'false') {
+	            return false;
+	        }
 
-	        var sections = []; // Stack to hold section tokens
-	        var tokens = []; // Buffer to hold the tokens
-	        var spaces = []; // Indices of whitespace tokens on the current line
-	        var hasTag = false; // Is there a {{tag}} on the current line?
-	        var nonSpace = false; // Is there a non-space char on the current line?
+	        var _getValue = function _getValue(data, attrStr) {
+	            var dotIndex = attrStr.indexOf(".");
 
-	        // Strips all whitespace tokens array for the current line
-	        // if there was a {{#tag}} on it and otherwise only space.
-	        function stripSpace() {
-	            if (hasTag && !nonSpace) {
-	                while (spaces.length) {
-	                    delete tokens[spaces.pop()];
+	            if (dotIndex > -1) {
+	                var attr = attrStr.substr(0, dotIndex);
+	                attrStr = attrStr.substr(dotIndex + 1);
+
+	                // �?查attrStr是否属�?�变量并转换
+	                if (typeof _data[attr] !== "undefined" && CONST_REG.test(attr)) {
+	                    attr = _data[attr];
+	                }
+
+	                if (typeof data[attr] !== "undefined") {
+	                    return _getValue(data[attr], attrStr);
+	                } else {
+	                    var eventData = {
+	                        name: realAttrStr,
+	                        data: _data
+	                    };
+
+	                    triggerEvent("nullvalue", {
+	                        type: "nullattr",
+	                        data: eventData
+	                    }, eventData);
+
+	                    // 如果还有
+	                    return "";
 	                }
 	            } else {
-	                spaces = [];
+
+	                // �?查attrStr是否属�?�变量并转换
+	                if (typeof _data[attrStr] !== "undefined" && CONST_REG.test(attrStr)) {
+	                    attrStr = _data[attrStr];
+	                }
+
+	                var rValue;
+	                if (typeof data[attrStr] !== "undefined") {
+	                    rValue = data[attrStr];
+	                } else {
+	                    var eventData = {
+	                        name: realAttrStr,
+	                        data: _data
+	                    };
+
+	                    triggerEvent("nullvalue", {
+	                        type: "nullvalue",
+	                        data: eventData
+	                    }, eventData);
+
+	                    rValue = '';
+	                }
+
+	                return rValue;
+	            }
+	        };
+
+	        return _getValue(_data, _attrStr);
+	    };
+
+	    // 注释node
+	    var commentNode = function commentNode(node) {};
+
+	    // 标识�?
+	    var IDENTOR_REG = /[a-zA-Z_\$]+[\w\$]*/g;
+	    var STRING_REG = /"([^"]*)"|'([^']*)'/g;
+	    var NUMBER_REG = /\d+|\d*\.\d+/g;
+
+	    var OBJECT_REG = /[a-zA-Z_\$]+[\w\$]*(?:\s*\.\s*(?:[a-zA-Z_\$]+[\w\$]*|\d+))*/g;
+	    // 非global 做test用
+	    var OBJECT_REG_NG = /[a-zA-Z_\$]+[\w\$]*(?:\s*\.\s*(?:[a-zA-Z_\$]+[\w\$]*|\d+))*/;
+
+	    var ATTR_REG = /\[([^\[\]]*)\]/g;
+	    var ATTR_REG_NG = /\[([^\[\]]*)\]/;
+	    var ATTR_REG_DOT = /\.([a-zA-Z_\$]+[\w\$]*)/g;
+
+	    var NOT_ATTR_REG = /[^\.|]([a-zA-Z_\$]+[\w\$]*)/g;
+
+	    var OR_REG = /\|\|/g;
+
+	    var OR_REPLACE = "OR_OPERATOR\x1E";
+
+	    var getRandom = function getRandom() {
+	        return "$$" + ~~(Math.random() * 1E6);
+	    };
+
+	    var CONST_PRIFIX = "_$C$_";
+	    var CONST_REG = /^_\$C\$_/;
+	    var CONST_REGG = /_\$C\$_[^\.]+/g;
+
+	    var getAttrVarKey = function getAttrVarKey() {
+	        return CONST_PRIFIX + ~~(Math.random() * 1E6);
+	    };
+
+	    var parseSodaExpression = function parseSodaExpression(str, scope) {
+	        // 对filter进行处理
+	        str = str.replace(OR_REG, OR_REPLACE).split("|");
+
+	        for (var i = 0; i < str.length; i++) {
+	            str[i] = (str[i].replace(new RegExp(OR_REPLACE, 'g'), "||") || '').trim();
+	        }
+
+	        var expr = str[0] || "";
+	        var filters = str.slice(1);
+
+	        // 将字符常量保存下�?
+	        expr = expr.replace(STRING_REG, function (r, $1, $2) {
+	            var key = getRandom();
+	            scope[key] = $1 || $2;
+	            return key;
+	        });
+
+	        while (ATTR_REG_NG.test(expr)) {
+	            ATTR_REG.lastIndex = 0;
+
+	            //对expr预处�?
+	            expr = expr.replace(ATTR_REG, function (r, $1) {
+	                var key = getAttrVarKey();
+	                // 属�?�名�? 为字符常�?
+	                var attrName = parseSodaExpression($1, scope);
+
+	                // 给一个特殊的前缀 表示是属性变�?
+
+	                scope[key] = attrName;
+
+	                return "." + key;
+	            });
+	        }
+
+	        expr = expr.replace(OBJECT_REG, function (value) {
+	            return "getValue(scope,'" + value.trim() + "')";
+	        });
+
+	        var parseFilter = function parseFilter() {
+	            var filterExpr = filters.shift();
+
+	            if (!filterExpr) {
+	                return;
 	            }
 
-	            hasTag = false;
-	            nonSpace = false;
+	            var filterExpr = filterExpr.split(":");
+	            var args = filterExpr.slice(1) || [];
+	            var name = filterExpr[0] || "";
+
+	            var stringReg = /^'.*'$|^".*"$/;
+	            for (var i = 0; i < args.length; i++) {
+	                //这里根据类型进行判断
+	                if (OBJECT_REG_NG.test(args[i])) {
+	                    args[i] = "getValue(scope,'" + args[i] + "')";
+	                } else {}
+	            }
+
+	            if (sodaFilterMap[name]) {
+	                args.unshift(expr);
+
+	                args = args.join(",");
+
+	                expr = "sodaFilterMap['" + name + "'](" + args + ")";
+	            }
+
+	            parseFilter();
+	        };
+
+	        parseFilter();
+
+	        var evalFunc = new Function("getValue", "sodaFilterMap", "return function sodaExp(scope){ return " + expr + "}")(getValue, sodaFilterMap);
+
+	        return evalFunc(scope);
+	    };
+
+	    var hashTable = {
+	        id2Expression: {},
+
+	        expression2id: {},
+
+	        getRandId: function getRandId() {
+	            return 'soda' + ~~(Math.random() * 1E5);
+	        }
+	    };
+
+	    // 解析指令
+	    // 解析attr
+	    var compileNode = function compileNode(node, scope) {
+	        // 如果只是文本
+	        if (node.nodeType === 3) {
+	            node.nodeValue = node.nodeValue.replace(valueoutReg, function (item, $1) {
+	                /*
+	                 var id = hashTable.getRandId();
+	                  hashTable.id2Expression[id] = {
+	                 expression: $1,
+	                 el: child
+	                 };
+	                  hashTable.expression2id[$1] = {
+	                 id: id,
+	                 el: child
+	                 };
+	                 */
+
+	                return parseSodaExpression($1, scope);
+	            });
 	        }
 
-	        var openingTagRe, closingTagRe, closingCurlyRe;
-	        function compileTags(tagsToCompile) {
-	            if (typeof tagsToCompile === 'string') tagsToCompile = tagsToCompile.split(spaceRe, 2);
+	        if (node.attributes) {
+	            // 指令处理
+	            sodaDirectiveArr.map(function (item) {
+	                var name = item.name;
 
-	            if (!isArray(tagsToCompile) || tagsToCompile.length !== 2) throw new Error('Invalid tags: ' + tagsToCompile);
+	                var opt = item.opt;
 
-	            openingTagRe = new RegExp(escapeRegExp(tagsToCompile[0]) + '\\s*');
-	            closingTagRe = new RegExp('\\s*' + escapeRegExp(tagsToCompile[1]));
-	            closingCurlyRe = new RegExp('\\s*' + escapeRegExp('}' + tagsToCompile[1]));
-	        }
+	                if (node.getAttribute(name) && node.parentNode) {
+	                    opt.link(scope, node, node.attributes);
+	                }
+	            });
 
-	        compileTags(tags || mustache.tags);
+	            // 处理输出 包含 prefix-*
+	            [].map.call(node.attributes, function (attr) {
+	                // 如果dirctiveMap有的就跳过不再处�?
+	                if (!sodaDirectiveMap[attr.name]) {
+	                    if (prefixReg.test(attr.name)) {
+	                        var attrName = attr.name.replace(prefixReg, '');
 
-	        var scanner = new Scanner(template);
+	                        if (attrName) {
+	                            if (attr.value) {
+	                                var attrValue = attr.value.replace(valueoutReg, function (item, $1) {
+	                                    return parseSodaExpression($1, scope);
+	                                });
 
-	        var start, type, value, chr, token, openSection;
-	        while (!scanner.eos()) {
-	            start = scanner.pos;
+	                                node.setAttribute(attrName, attrValue);
+	                            }
+	                        }
 
-	            // Match any text between tags.
-	            value = scanner.scanUntil(openingTagRe);
-
-	            if (value) {
-	                for (var i = 0, valueLength = value.length; i < valueLength; ++i) {
-	                    chr = value.charAt(i);
-
-	                    if (isWhitespace(chr)) {
-	                        spaces.push(tokens.length);
+	                        // 对其他属性里含expr 处理
 	                    } else {
-	                        nonSpace = true;
+	                        if (attr.value) {
+	                            attr.value = attr.value.replace(valueoutReg, function (item, $1) {
+	                                return parseSodaExpression($1, scope);
+	                            });
+	                        }
+	                    }
+	                }
+	            });
+	        }
+
+	        nodes2Arr(node.childNodes).map(function (child) {
+	            compileNode(child, scope);
+	        });
+	    };
+
+	    var sodaDirectiveMap = {};
+
+	    var sodaFilterMap = {};
+
+	    var sodaDirectiveArr = [];
+
+	    var sodaDirective = function sodaDirective(name, func) {
+	        var name = prefix + '-' + name;
+	        sodaDirectiveMap[name] = func();
+
+	        sodaDirectiveArr.push({
+	            name: name,
+	            opt: sodaDirectiveMap[name]
+	        });
+	    };
+
+	    var sodaFilter = function sodaFilter(name, func) {
+	        sodaFilterMap[name] = func;
+	    };
+
+	    sodaFilter.get = function (name) {
+	        return sodaFilterMap[name];
+	    };
+
+	    sodaFilter("date", function (input, lenth) {
+	        return lenth;
+	    });
+
+	    sodaDirective('repeat', function () {
+	        return {
+	            priority: 10,
+	            compile: function compile(scope, el, attrs) {},
+	            link: function link(scope, el, attrs) {
+	                var opt = el.getAttribute(prefix + '-repeat');
+	                var itemName;
+	                var valueName;
+
+	                var trackReg = /\s+by\s+([^\s]+)$/;
+
+	                var trackName;
+	                opt = opt.replace(trackReg, function (item, $1) {
+	                    if ($1) {
+	                        trackName = ($1 || '').trim();
 	                    }
 
-	                    tokens.push(['text', chr, start, start + 1]);
-	                    start += 1;
+	                    return '';
+	                });
 
-	                    // Check for whitespace on the current line.
-	                    if (chr === '\n') stripSpace();
-	                }
-	            }
+	                var inReg = /([^\s]+)\s+in\s+([^\s]+)|\(([^,]+)\s*,\s*([^)]+)\)\s+in\s+([^\s]+)/;
 
-	            // Match the opening tag.
-	            if (!scanner.scan(openingTagRe)) break;
+	                var r = inReg.exec(opt);
+	                if (r) {
+	                    if (r[1] && r[2]) {
+	                        itemName = (r[1] || '').trim();
+	                        valueName = (r[2] || '').trim();
 
-	            hasTag = true;
-
-	            // Get the tag type.
-	            type = scanner.scan(tagRe) || 'name';
-	            scanner.scan(whiteRe);
-
-	            // Get the tag value.
-	            if (type === '=') {
-	                value = scanner.scanUntil(equalsRe);
-	                scanner.scan(equalsRe);
-	                scanner.scanUntil(closingTagRe);
-	            } else if (type === '{') {
-	                value = scanner.scanUntil(closingCurlyRe);
-	                scanner.scan(curlyRe);
-	                scanner.scanUntil(closingTagRe);
-	                type = '&';
-	            } else {
-	                value = scanner.scanUntil(closingTagRe);
-	            }
-
-	            // Match the closing tag.
-	            if (!scanner.scan(closingTagRe)) throw new Error('Unclosed tag at ' + scanner.pos);
-
-	            token = [type, value, start, scanner.pos];
-	            tokens.push(token);
-
-	            if (type === '#' || type === '^') {
-	                sections.push(token);
-	            } else if (type === '/') {
-	                // Check section nesting.
-	                openSection = sections.pop();
-
-	                if (!openSection) throw new Error('Unopened section "' + value + '" at ' + start);
-
-	                if (openSection[1] !== value) throw new Error('Unclosed section "' + openSection[1] + '" at ' + start);
-	            } else if (type === 'name' || type === '{' || type === '&') {
-	                nonSpace = true;
-	            } else if (type === '=') {
-	                // Set the tags for the next time around.
-	                compileTags(value);
-	            }
-	        }
-
-	        // Make sure there are no open sections when we're done.
-	        openSection = sections.pop();
-
-	        if (openSection) throw new Error('Unclosed section "' + openSection[1] + '" at ' + scanner.pos);
-
-	        return nestTokens(squashTokens(tokens));
-	    }
-
-	    /**
-	     * Combines the values of consecutive text tokens in the given `tokens` array
-	     * to a single token.
-	     */
-	    function squashTokens(tokens) {
-	        var squashedTokens = [];
-
-	        var token, lastToken;
-	        for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
-	            token = tokens[i];
-
-	            if (token) {
-	                if (token[0] === 'text' && lastToken && lastToken[0] === 'text') {
-	                    lastToken[1] += token[1];
-	                    lastToken[3] = token[3];
-	                } else {
-	                    squashedTokens.push(token);
-	                    lastToken = token;
-	                }
-	            }
-	        }
-
-	        return squashedTokens;
-	    }
-
-	    /**
-	     * Forms the given array of `tokens` into a nested tree structure where
-	     * tokens that represent a section have two additional items: 1) an array of
-	     * all tokens that appear in that section and 2) the index in the original
-	     * template that represents the end of that section.
-	     */
-	    function nestTokens(tokens) {
-	        var nestedTokens = [];
-	        var collector = nestedTokens;
-	        var sections = [];
-
-	        var token, section;
-	        for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
-	            token = tokens[i];
-
-	            switch (token[0]) {
-	                case '#':
-	                case '^':
-	                    collector.push(token);
-	                    sections.push(token);
-	                    collector = token[4] = [];
-	                    break;
-	                case '/':
-	                    section = sections.pop();
-	                    section[5] = token[2];
-	                    collector = sections.length > 0 ? sections[sections.length - 1][4] : nestedTokens;
-	                    break;
-	                default:
-	                    collector.push(token);
-	            }
-	        }
-
-	        return nestedTokens;
-	    }
-
-	    /**
-	     * A simple string scanner that is used by the template parser to find
-	     * tokens in template strings.
-	     */
-	    function Scanner(string) {
-	        this.string = string;
-	        this.tail = string;
-	        this.pos = 0;
-	    }
-
-	    /**
-	     * Returns `true` if the tail is empty (end of string).
-	     */
-	    Scanner.prototype.eos = function eos() {
-	        return this.tail === '';
-	    };
-
-	    /**
-	     * Tries to match the given regular expression at the current position.
-	     * Returns the matched text if it can match, the empty string otherwise.
-	     */
-	    Scanner.prototype.scan = function scan(re) {
-	        var match = this.tail.match(re);
-
-	        if (!match || match.index !== 0) return '';
-
-	        var string = match[0];
-
-	        this.tail = this.tail.substring(string.length);
-	        this.pos += string.length;
-
-	        return string;
-	    };
-
-	    /**
-	     * Skips all text until the given regular expression can be matched. Returns
-	     * the skipped string, which is the entire tail if no match can be made.
-	     */
-	    Scanner.prototype.scanUntil = function scanUntil(re) {
-	        var index = this.tail.search(re),
-	            match;
-
-	        switch (index) {
-	            case -1:
-	                match = this.tail;
-	                this.tail = '';
-	                break;
-	            case 0:
-	                match = '';
-	                break;
-	            default:
-	                match = this.tail.substring(0, index);
-	                this.tail = this.tail.substring(index);
-	        }
-
-	        this.pos += match.length;
-
-	        return match;
-	    };
-
-	    /**
-	     * Represents a rendering context by wrapping a view object and
-	     * maintaining a reference to the parent context.
-	     */
-	    function Context(view, parentContext) {
-	        this.view = view;
-	        this.cache = { '.': this.view };
-	        this.parent = parentContext;
-	    }
-
-	    /**
-	     * Creates a new context using the given view with this context
-	     * as the parent.
-	     */
-	    Context.prototype.push = function push(view) {
-	        return new Context(view, this);
-	    };
-
-	    /**
-	     * Returns the value of the given name in this context, traversing
-	     * up the context hierarchy if the value is absent in this context's view.
-	     */
-	    Context.prototype.lookup = function lookup(name) {
-	        var cache = this.cache;
-
-	        var value;
-	        if (cache.hasOwnProperty(name)) {
-	            value = cache[name];
-	        } else {
-	            var context = this,
-	                names,
-	                index,
-	                lookupHit = false;
-
-	            while (context) {
-	                if (name.indexOf('.') > 0) {
-	                    value = context.view;
-	                    names = name.split('.');
-	                    index = 0;
-
-	                    /**
-	                     * Using the dot notion path in `name`, we descend through the
-	                     * nested objects.
-	                     *
-	                     * To be certain that the lookup has been successful, we have to
-	                     * check if the last object in the path actually has the property
-	                     * we are looking for. We store the result in `lookupHit`.
-	                     *
-	                     * This is specially necessary for when the value has been set to
-	                     * `undefined` and we want to avoid looking up parent contexts.
-	                     **/
-	                    while (value != null && index < names.length) {
-	                        if (index === names.length - 1) lookupHit = hasProperty(value, names[index]);
-
-	                        value = value[names[index++]];
+	                        if (!(itemName && valueName)) {
+	                            return;
+	                        }
+	                    } else if (r[3] && r[4] && r[5]) {
+	                        trackName = (r[3] || '').trim();
+	                        itemName = (r[4] || '').trim();
+	                        valueName = (r[5] || '').trim();
 	                    }
 	                } else {
-	                    value = context.view[name];
-	                    lookupHit = hasProperty(context.view, name);
+	                    return;
 	                }
 
-	                if (lookupHit) break;
+	                trackName = trackName || '$index';
 
-	                context = context.parent;
+	                // 这里要处理一�?
+	                var repeatObj = getValue(scope, valueName) || [];
+
+	                var repeatFunc = function repeatFunc(i) {
+	                    var itemNode = el.cloneNode(true);
+
+	                    // 这里创建�?个新的scope
+	                    var itemScope = {};
+	                    itemScope[trackName] = i;
+
+	                    itemScope[itemName] = repeatObj[i];
+
+	                    itemScope.__proto__ = scope;
+
+	                    itemNode.removeAttribute(prefix + '-repeat');
+
+	                    el.parentNode.insertBefore(itemNode, el);
+
+	                    // 这里是新加的dom, 要单独编�?
+	                    compileNode(itemNode, itemScope);
+	                };
+
+	                if ('length' in repeatObj) {
+	                    for (var i = 0; i < repeatObj.length; i++) {
+	                        repeatFunc(i);
+	                    }
+	                } else {
+	                    for (var i in repeatObj) {
+	                        if (repeatObj.hasOwnProperty(i)) {
+	                            repeatFunc(i);
+	                        }
+	                    }
+	                }
+
+	                el.parentNode.removeChild(el);
 	            }
+	        };
+	    });
 
-	            cache[name] = value;
-	        }
+	    sodaDirective('if', function () {
+	        return {
+	            priority: 9,
+	            link: function link(scope, el, attrs) {
+	                var opt = el.getAttribute(prefix + '-if');
 
-	        if (isFunction(value)) value = value.call(this.view);
+	                var expressFunc = parseSodaExpression(opt, scope);
 
-	        return value;
-	    };
-
-	    /**
-	     * A Writer knows how to take a stream of tokens and render them to a
-	     * string, given a context. It also maintains a cache of templates to
-	     * avoid the need to parse the same template twice.
-	     */
-	    function Writer() {
-	        this.cache = {};
-	    }
-
-	    /**
-	     * Clears all cached templates in this writer.
-	     */
-	    Writer.prototype.clearCache = function clearCache() {
-	        this.cache = {};
-	    };
-
-	    /**
-	     * Parses and caches the given `template` and returns the array of tokens
-	     * that is generated from the parse.
-	     */
-	    Writer.prototype.parse = function parse(template, tags) {
-	        var cache = this.cache;
-	        var tokens = cache[template];
-
-	        if (tokens == null) tokens = cache[template] = parseTemplate(template, tags);
-
-	        return tokens;
-	    };
-
-	    /**
-	     * High-level method that is used to render the given `template` with
-	     * the given `view`.
-	     *
-	     * The optional `partials` argument may be an object that contains the
-	     * names and templates of partials that are used in the template. It may
-	     * also be a function that is used to load partial templates on the fly
-	     * that takes a single argument: the name of the partial.
-	     */
-	    Writer.prototype.render = function render(template, view, partials) {
-	        var tokens = this.parse(template);
-	        var context = view instanceof Context ? view : new Context(view);
-	        return this.renderTokens(tokens, context, partials, template);
-	    };
-
-	    /**
-	     * Low-level method that renders the given array of `tokens` using
-	     * the given `context` and `partials`.
-	     *
-	     * Note: The `originalTemplate` is only ever used to extract the portion
-	     * of the original template that was contained in a higher-order section.
-	     * If the template doesn't use higher-order sections, this argument may
-	     * be omitted.
-	     */
-	    Writer.prototype.renderTokens = function renderTokens(tokens, context, partials, originalTemplate) {
-	        var buffer = '';
-
-	        var token, symbol, value;
-	        for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
-	            value = undefined;
-	            token = tokens[i];
-	            symbol = token[0];
-
-	            if (symbol === '#') value = this.renderSection(token, context, partials, originalTemplate);else if (symbol === '^') value = this.renderInverted(token, context, partials, originalTemplate);else if (symbol === '>') value = this.renderPartial(token, context, partials, originalTemplate);else if (symbol === '&') value = this.unescapedValue(token, context);else if (symbol === 'name') value = this.escapedValue(token, context);else if (symbol === 'text') value = this.rawValue(token);
-
-	            if (value !== undefined) buffer += value;
-	        }
-
-	        return buffer;
-	    };
-
-	    Writer.prototype.renderSection = function renderSection(token, context, partials, originalTemplate) {
-	        var self = this;
-	        var buffer = '';
-	        var value = context.lookup(token[1]);
-
-	        // This function is used to render an arbitrary template
-	        // in the current context by higher-order sections.
-	        function subRender(template) {
-	            return self.render(template, context, partials);
-	        }
-
-	        if (!value) return;
-
-	        if (isArray(value)) {
-	            for (var j = 0, valueLength = value.length; j < valueLength; ++j) {
-	                buffer += this.renderTokens(token[4], context.push(value[j]), partials, originalTemplate);
+	                if (expressFunc) {} else {
+	                    // el.setAttribute("removed", "removed");
+	                    el.parentNode && el.parentNode.removeChild(el);
+	                }
 	            }
-	        } else if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' || typeof value === 'string' || typeof value === 'number') {
-	            buffer += this.renderTokens(token[4], context.push(value), partials, originalTemplate);
-	        } else if (isFunction(value)) {
-	            if (typeof originalTemplate !== 'string') throw new Error('Cannot use higher-order sections without the original template');
+	        };
+	    });
 
-	            // Extract the portion of the original template that the section contains.
-	            value = value.call(context.view, originalTemplate.slice(token[3], token[5]), subRender);
+	    sodaDirective('class', function () {
+	        return {
+	            link: function link(scope, el, attrs) {
+	                var opt = el.getAttribute(prefix + "-class");
 
-	            if (value != null) buffer += value;
-	        } else {
-	            buffer += this.renderTokens(token[4], context, partials, originalTemplate);
+	                var expressFunc = parseSodaExpression(opt, scope);
+
+	                if (expressFunc) {
+	                    addClass(el, expressFunc);
+	                } else {}
+	            }
+	        };
+	    });
+
+	    sodaDirective('src', function () {
+	        return {
+	            link: function link(scope, el, attrs) {
+	                var opt = el.getAttribute(prefix + "-src");
+
+	                var expressFunc = opt.replace(valueoutReg, function (item, $1) {
+	                    return parseSodaExpression($1, scope);
+	                });
+
+	                if (expressFunc) {
+	                    el.setAttribute("src", expressFunc);
+	                } else {}
+	            }
+	        };
+	    });
+
+	    sodaDirective('bind-html', function () {
+	        return {
+	            link: function link(scope, el, attrs) {
+	                var opt = el.getAttribute(prefix + "-bind-html");
+	                var expressFunc = parseSodaExpression(opt, scope);
+
+	                if (expressFunc) {
+	                    el.innerHTML = expressFunc;
+
+	                    return {
+	                        command: "childDone"
+	                    };
+	                }
+	            }
+	        };
+	    });
+
+	    sodaDirective('html', function () {
+	        return {
+	            link: function link(scope, el, attrs) {
+	                var opt = el.getAttribute(prefix + "-html");
+	                var expressFunc = parseSodaExpression(opt, scope);
+
+	                if (expressFunc) {
+	                    el.innerHTML = expressFunc;
+
+	                    return {
+	                        command: "childDone"
+	                    };
+	                }
+	            }
+	        };
+	    });
+
+	    sodaDirective('replace', function () {
+	        return {
+	            link: function link(scope, el, attrs) {
+	                var opt = el.getAttribute(prefix + "-replace");
+	                var expressFunc = parseSodaExpression(opt, scope);
+
+	                if (expressFunc) {
+	                    var div = document.createElement('div');
+	                    div.innerHTML = expressFunc;
+
+	                    if (el.parentNode) {
+	                        while (div.childNodes[0]) {
+	                            el.parentNode.insertBefore(div.childNodes[0], el);
+	                        }
+	                    }
+	                }
+
+	                el.parentNode.removeChild(el);
+	            }
+	        };
+	    });
+
+	    sodaDirective("style", function () {
+	        return {
+	            link: function link(scope, el, attrs) {
+	                var opt = el.getAttribute(prefix + "-style");
+	                var expressFunc = parseSodaExpression(opt, scope);
+
+	                var getCssValue = function getCssValue(name, value) {
+	                    var numberWithoutpx = /opacity|z-index/;
+	                    if (numberWithoutpx.test(name)) {
+	                        return parseFloat(value);
+	                    }
+
+	                    if (isNaN(value)) {
+	                        return value;
+	                    } else {
+	                        return value + "px";
+	                    }
+	                };
+
+	                if (expressFunc) {
+	                    var stylelist = [];
+
+	                    for (var i in expressFunc) {
+	                        if (expressFunc.hasOwnProperty(i)) {
+	                            var provalue = getCssValue(i, expressFunc[i]);
+
+	                            stylelist.push([i, provalue].join(":"));
+	                        }
+	                    }
+
+	                    var style = el.style;
+	                    for (var i = 0; i < style.length; i++) {
+	                        var name = style[i];
+	                        if (expressFunc[name]) {} else {
+	                            stylelist.push([name, style[name]].join(":"));
+	                        }
+	                    }
+
+	                    var styleStr = stylelist.join(";");
+
+	                    el.setAttribute("style", styleStr);
+	                }
+	            }
+	        };
+	    });
+
+	    var sodaRender = function sodaRender(str, data) {
+	        // 对directive进行排序
+	        sodaDirectiveArr.sort(function (b, a) {
+	            return Number(a.opt.priority || 0) - Number(b.opt.priority || 0);
+	        });
+
+	        //console.log(sodaDirectiveArr);
+
+	        // 解析模板DOM
+	        var div = document.createElement("div");
+
+	        // 必须加入到body中去，不然自定义标签不生效
+	        if (document.documentMode < 9) {
+	            div.style.display = 'none';
+	            document.body.appendChild(div);
 	        }
-	        return buffer;
-	    };
 
-	    Writer.prototype.renderInverted = function renderInverted(token, context, partials, originalTemplate) {
-	        var value = context.lookup(token[1]);
+	        div.innerHTML = str;
 
-	        // Use JavaScript's definition of falsy. Include empty arrays.
-	        // See https://github.com/janl/mustache.js/issues/186
-	        if (!value || isArray(value) && value.length === 0) return this.renderTokens(token[4], context, partials, originalTemplate);
-	    };
+	        nodes2Arr(div.childNodes).map(function (child) {
+	            compileNode(child, data);
+	        });
 
-	    Writer.prototype.renderPartial = function renderPartial(token, context, partials) {
-	        if (!partials) return;
+	        var innerHTML = div.innerHTML;
 
-	        var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
-	        if (value != null) return this.renderTokens(this.parse(value), context, partials, value);
-	    };
-
-	    Writer.prototype.unescapedValue = function unescapedValue(token, context) {
-	        var value = context.lookup(token[1]);
-	        if (value != null) return value;
-	    };
-
-	    Writer.prototype.escapedValue = function escapedValue(token, context) {
-	        var value = context.lookup(token[1]);
-	        if (value != null) return mustache.escape(value);
-	    };
-
-	    Writer.prototype.rawValue = function rawValue(token) {
-	        return token[1];
-	    };
-
-	    mustache.name = 'mustache.js';
-	    mustache.version = '2.3.0';
-	    mustache.tags = ['{{', '}}'];
-
-	    // All high-level mustache.* functions use this writer.
-	    var defaultWriter = new Writer();
-
-	    /**
-	     * Clears all cached templates in the default writer.
-	     */
-	    mustache.clearCache = function clearCache() {
-	        return defaultWriter.clearCache();
-	    };
-
-	    /**
-	     * Parses and caches the given template in the default writer and returns the
-	     * array of tokens it contains. Doing this ahead of time avoids the need to
-	     * parse templates on the fly as they are rendered.
-	     */
-	    mustache.parse = function parse(template, tags) {
-	        return defaultWriter.parse(template, tags);
-	    };
-
-	    /**
-	     * Renders the `template` with the given `view` and `partials` using the
-	     * default writer.
-	     */
-	    mustache.render = function render(template, view, partials) {
-	        if (typeof template !== 'string') {
-	            throw new TypeError('Invalid template! Template should be a "string" ' + 'but "' + typeStr(template) + '" was given as the first ' + 'argument for mustache#render(template, view, partials)');
+	        if (document.documentMode < 9) {
+	            document.body.removeChild(div);
 	        }
 
-	        return defaultWriter.render(template, view, partials);
+	        return innerHTML;
+
+	        //  var frament = document.createDocumentFragment();
+	        //  frament.innerHTML = div.innerHTML;
+
+	        /*
+	         frament.update = function(newData){
+	         //checkingDirtyData(data, d);
+	         var diff = DeepDiff.noConflict();
+	          var diffResult = diff(data, newData);
+	          console.log(diffResult);
+	          var dirtyData = ['a'];
+	          for(var i = 0; i < dirtyData.length; i ++){
+	         var item = dirtyData[i];
+	          var id = hashTable.expression2id[item];
+	          var nowValue = parseSodaExpression(item, newData);
+	         //console.log(nowValue);
+	          if(id.el){
+	         id.el.nodeValue = nowValue;
+	         }
+	         }
+	          console.log(hashTable);
+	           };
+	         */
+
+	        var child;
+	        while (child = div.childNodes[0]) {
+	            frament.appendChild(child);
+	        }
+
+	        return frament;
 	    };
 
-	    // This is here for backwards compatibility with 0.4.x.,
-	    /*eslint-disable */ // eslint wants camel cased function name
-	    mustache.to_html = function to_html(template, view, partials, send) {
-	        /*eslint-enable*/
+	    var eventPool = {};
+	    sodaRender.addEventListener = function (type, func) {
+	        if (eventPool[type]) {} else {
+	            eventPool[type] = [];
+	        }
 
-	        var result = mustache.render(template, view, partials);
+	        eventPool[type].push(func);
+	    };
 
-	        if (isFunction(send)) {
-	            send(result);
-	        } else {
-	            return result;
+	    var triggerEvent = function triggerEvent(type, e, data) {
+	        var events = eventPool[type] || [];
+
+	        for (var i = 0; i < events.length; i++) {
+	            var eventFunc = events[i];
+	            eventFunc && eventFunc(e, data);
 	        }
 	    };
 
-	    // Export the escaping function so that the user may override it.
-	    // See https://github.com/janl/mustache.js/issues/244
-	    mustache.escape = escapeHtml;
+	    sodaRender.filter = sodaFilter;
 
-	    // Export these mainly for testing, but also for advanced usage.
-	    mustache.Scanner = Scanner;
-	    mustache.Context = Context;
-	    mustache.Writer = Writer;
+	    sodaRender.prefix = function (newPrefix) {
 
-	    return mustache;
-	});
+	        for (var key in sodaDirectiveMap) {
+	            if (sodaDirectiveMap.hasOwnProperty(key)) {
+	                sodaDirectiveMap[key.replace(prefix, newPrefix)] = sodaDirectiveMap[key];
+	                delete sodaDirectiveMap[key];
+	            }
+	        }
 
-/***/ },
+	        var i = 0,
+	            len = sodaDirectiveArr.length;
+	        for (; i < len; i++) {
+	            sodaDirectiveArr[i].name = sodaDirectiveArr[i].name.replace(prefix, newPrefix);
+	        }
+
+	        prefix = newPrefix;
+	        prefixReg = new RegExp('^' + prefix + '-');
+	    };
+
+	    if (( false ? 'undefined' : _typeof(exports)) === 'object' && ( false ? 'undefined' : _typeof(module)) === 'object') module.exports = sodaRender;else if (true) !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+	        return sodaRender;
+	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));else if ((typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object') exports["soda"] = sodaRender;else window.soda = sodaRender;
+
+	    // 监听数据异常情况
+	})();
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ }),
 /* 4 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
+
+	"use strict";
+
+	module.exports = function (module) {
+		if (!module.webpackPolyfill) {
+			module.deprecate = function () {};
+			module.paths = [];
+			// module.parent = undefined by default
+			module.children = [];
+			module.webpackPolyfill = 1;
+		}
+		return module;
+	};
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -1056,19 +1221,19 @@
 
 	var _omi2 = _interopRequireDefault(_omi);
 
-	var _style = __webpack_require__(5);
+	var _style = __webpack_require__(6);
 
 	var _style2 = _interopRequireDefault(_style);
 
-	var _event = __webpack_require__(6);
+	var _event = __webpack_require__(7);
 
 	var _event2 = _interopRequireDefault(_event);
 
-	var _diff = __webpack_require__(7);
+	var _morphdom = __webpack_require__(8);
 
-	var _diff2 = _interopRequireDefault(_diff);
+	var _morphdom2 = _interopRequireDefault(_morphdom);
 
-	var _html2json = __webpack_require__(8);
+	var _html2json = __webpack_require__(9);
 
 	var _html2json2 = _interopRequireDefault(_html2json);
 
@@ -1077,9 +1242,21 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Component = function () {
-	    function Component(data, server) {
+	    function Component(data, option) {
 	        _classCallCheck(this, Component);
 
+	        var componentOption = Object.assign({
+	            server: false,
+	            ignoreStoreData: false,
+	            preventSelfUpdate: false,
+	            selfDataFirst: false,
+	            domDiffDisabled: false,
+	            scopedSelfCSS: false
+	        }, option);
+	        this._omi_scopedSelfCSS = componentOption.scopedSelfCSS;
+	        this._omi_preventSelfUpdate = componentOption.preventSelfUpdate;
+	        this._omi_domDiffDisabled = componentOption.domDiffDisabled;
+	        this._omi_ignoreStoreData = componentOption.ignoreStoreData;
 	        //re render the server-side rendering html on the client-side
 	        var type = Object.prototype.toString.call(data);
 	        var isReRendering = type !== '[object Object]' && type !== '[object Undefined]';
@@ -1090,26 +1267,28 @@
 	            this.data = JSON.parse(this._hidden.value);
 	        } else {
 	            this.data = data || {};
-	            this._omi_server_rendering = server;
+	            this._omi_server_rendering = componentOption.server;
 	            this.id = this._omi_server_rendering ? 1000000 + _omi2['default'].getInstanceId() : _omi2['default'].getInstanceId();
 	        }
 	        this.refs = {};
 	        this.children = [];
-	        this.childrenData = [];
+
 	        this.HTML = null;
-	        this._addedItems = [];
-	        this._omi_order = [];
+
 	        _omi2['default'].instances[this.id] = this;
-	        this.dataFirst = true;
+	        this.selfDataFirst = componentOption.selfDataFirst;
+
 	        this._omi_scoped_attr = _omi2['default'].STYLESCOPEDPREFIX + this.id;
-	        //this.BODY_ELEMENT = document.createElement('body');
+	        //this.BODY_ELEMENT = document.createElement('body')
 	        this._preCSS = null;
 	        this._omiGroupDataCounter = {};
+	        this._omi_installedHandlers = null;
 	        if (this._omi_server_rendering || isReRendering) {
 	            this.install();
 	            this._render(true);
-	            this.installed();
 	            this._childrenInstalled(this);
+	            this.installed();
+	            this._execInstalledHandlers();
 	        }
 	    }
 
@@ -1119,6 +1298,21 @@
 	    }, {
 	        key: 'installed',
 	        value: function installed() {}
+	    }, {
+	        key: 'onInstalled',
+	        value: function onInstalled(handler) {
+	            if (!this._omi_installedHandlers) {
+	                this._omi_installedHandlers = [];
+	            }
+	            this._omi_installedHandlers.push(handler);
+	        }
+	    }, {
+	        key: '_execInstalledHandlers',
+	        value: function _execInstalledHandlers() {
+	            this._omi_installedHandlers && this._omi_installedHandlers.forEach(function (handler) {
+	                handler();
+	            });
+	        }
 	    }, {
 	        key: 'uninstall',
 	        value: function uninstall() {}
@@ -1135,28 +1329,99 @@
 	        key: 'style',
 	        value: function style() {}
 	    }, {
-	        key: 'update',
-	        value: function update() {
+	        key: 'beforeRender',
+	        value: function beforeRender() {}
+	    }, {
+	        key: 'useStore',
+	        value: function useStore(store) {
+	            var _this = this;
+
+	            this.$$store = store;
+	            var isInclude = false;
+	            store.instances.forEach(function (instance) {
+	                if (instance.id === _this.id) {
+	                    isInclude = true;
+	                }
+	            });
+	            if (!isInclude) {
+	                store.instances.push(this);
+	            }
+	        }
+	    }, {
+	        key: 'updateSelf',
+	        value: function updateSelf() {
 	            this.beforeUpdate();
 	            if (this.renderTo) {
-	                this._render();
+	                this._render(false, true);
 	            } else {
+	                if (this._omi_preventSelfUpdate) return;
 	                // update child node
 	                if (this._omi_removed) {
 	                    var hdNode = this._createHiddenNode();
 	                    this.node.parentNode.replaceChild(hdNode, this.node);
 	                    this.node = hdNode;
 	                } else {
-	                    (0, _diff2['default'])(this.node, (0, _event2['default'])(this._childRender(this._omiChildStr), this.id));
+	                    (0, _morphdom2['default'])(this.node, (0, _event2['default'])(this._childRender(this._omiChildStr, true), this.id), {
+	                        ignoreAttr: this._getIgnoreAttr()
+	                    });
 
 	                    this.node = document.querySelector("[" + this._omi_scoped_attr + "]");
 	                    this._queryElements(this);
 	                    this._fixForm();
 	                }
 	            }
-	            //update added components
-	            this._renderAddedChildren();
 	            this.afterUpdate();
+	        }
+	    }, {
+	        key: 'update',
+	        value: function update() {
+	            this.beforeUpdate();
+	            this._childrenBeforeUpdate(this);
+	            this._omiGroupDataCounter = {};
+	            if (this.renderTo) {
+	                this._render();
+	            } else {
+	                if (this._omi_preventSelfUpdate) return;
+	                // update child node
+	                if (this._omi_removed) {
+	                    var hdNode = this._createHiddenNode();
+	                    this.node.parentNode.replaceChild(hdNode, this.node);
+	                    this.node = hdNode;
+	                } else {
+	                    if (this._omi_domDiffDisabled) {
+	                        this.node.parentNode.replaceChild(_morphdom2['default'].toElement((0, _event2['default'])(this._childRender(this._omiChildStr), this.id)), this.node);
+	                    } else {
+	                        (0, _morphdom2['default'])(this.node, (0, _event2['default'])(this._childRender(this._omiChildStr), this.id));
+	                    }
+	                    this.node = document.querySelector("[" + this._omi_scoped_attr + "]");
+	                    this._queryElements(this);
+	                    this._fixForm();
+	                }
+	            }
+
+	            this._childrenAfterUpdate(this);
+	            this.afterUpdate();
+	        }
+	    }, {
+	        key: '_childrenBeforeUpdate',
+	        value: function _childrenBeforeUpdate(root) {
+	            var _this2 = this;
+
+	            root.children.forEach(function (child) {
+	                child.beforeUpdate();
+	                child._omiGroupDataCounter = {};
+	                _this2._childrenBeforeUpdate(child);
+	            });
+	        }
+	    }, {
+	        key: '_childrenAfterUpdate',
+	        value: function _childrenAfterUpdate(root) {
+	            var _this3 = this;
+
+	            root.children.forEach(function (child) {
+	                _this3._childrenAfterUpdate(child);
+	                child.afterUpdate();
+	            });
 	        }
 	    }, {
 	        key: 'setData',
@@ -1187,35 +1452,6 @@
 	            child.restore();
 	        }
 	    }, {
-	        key: 'setComponentOrder',
-	        value: function setComponentOrder(arr) {
-	            var _this = this;
-
-	            arr.forEach(function (item, index) {
-	                _this._omi_order[index] = item;
-	            });
-	            this.update();
-	        }
-	        //beforeBegin,beforeEnd,afterBegin,afterEnd
-
-	    }, {
-	        key: 'addComponent',
-	        value: function addComponent(position, el, component) {
-	            this._addedItems.push({ position: position, el: el, component: component });
-	            this.update();
-	        }
-	    }, {
-	        key: 'removeComponent',
-	        value: function removeComponent(component) {
-	            for (var i = 0, len = this._addedItems.length; i < len; i++) {
-	                if (component.id === this._addedItems[i].component.id) {
-	                    this._addedItems.splice(i, 1);
-	                    break;
-	                }
-	            }
-	            this.update();
-	        }
-	    }, {
 	        key: 'remove',
 	        value: function remove() {
 	            this._omi_removed = true;
@@ -1228,28 +1464,12 @@
 	            this._omi_removed = false;
 	            this.update();
 	            this.installed();
-	        }
-	    }, {
-	        key: '_renderAddedChildren',
-	        value: function _renderAddedChildren() {
-	            var _this2 = this;
-
-	            this._addedItems.forEach(function (item) {
-	                var target = typeof item.el === "string" ? _this2.node.querySelector(item.el) : item.el;
-	                item.component.install();
-	                item.component._render(true);
-	                item.component.installed();
-	                item.component._childrenInstalled(item.component);
-	                target.insertAdjacentHTML(item.position, item.component.HTML);
-	            });
-	            this.children.forEach(function (child) {
-	                child._renderAddedChildren();
-	            });
+	            this._execInstalledHandlers();
 	        }
 	    }, {
 	        key: '_render',
-	        value: function _render(isFirst) {
-	            var _this3 = this;
+	        value: function _render(isFirst, isSelf) {
+	            var _this4 = this;
 
 	            if (this._omi_removed) {
 	                var node = this._createHiddenNode();
@@ -1261,16 +1481,23 @@
 	                }
 	                return;
 	            }
-	            this._generateHTMLCSS();
-	            this._extractChildren(this);
-	            if (isFirst) {
-	                this.children.forEach(function (item, index) {
-	                    _this3._omi_order[index] = index;
-	                });
+	            if (this._omi_autoStoreToData) {
+	                if (!this._omi_ignoreStoreData) {
+	                    this.data = this.$store.data;
+	                }
 	            }
-	            this.children.forEach(function (item, index) {
-	                _this3.HTML = _this3.HTML.replace(item._omiChildStr, _this3.children[_this3._omi_order[index]].HTML);
+	            this.beforeRender();
+	            this._generateHTMLCSS();
+	            if (!isSelf) {
+	                this._extractChildren(this);
+	            } else {
+	                this._extractChildrenString(this);
+	            }
+
+	            this.children.forEach(function (item) {
+	                _this4.HTML = _this4.HTML.replace(item._omiChildStr, isSelf ? item.node.outerHTML : item.HTML);
 	            });
+
 	            this.HTML = (0, _event2['default'])(this.HTML, this.id);
 	            if (isFirst) {
 	                if (this.renderTo) {
@@ -1282,9 +1509,15 @@
 	                }
 	            } else {
 	                if (this.HTML !== "") {
-	                    (0, _diff2['default'])(this.node, this.HTML);
+	                    if (this._omi_domDiffDisabled) {
+	                        this.renderTo.innerHTML = this.HTML;
+	                    } else {
+	                        (0, _morphdom2['default'])(this.node, this.HTML, isSelf ? {
+	                            ignoreAttr: this._getIgnoreAttr()
+	                        } : null);
+	                    }
 	                } else {
-	                    (0, _diff2['default'])(this.node, this._createHiddenNode());
+	                    (0, _morphdom2['default'])(this.node, this._createHiddenNode());
 	                }
 	            }
 	            //get node prop from parent node
@@ -1295,28 +1528,64 @@
 	            }
 	        }
 	    }, {
+	        key: '_getIgnoreAttr',
+	        value: function _getIgnoreAttr() {
+	            var arr = [];
+	            this.children.forEach(function (child) {
+	                arr.push(child._omi_scoped_attr);
+	            });
+	            return arr;
+	        }
+	    }, {
 	        key: '_childRender',
-	        value: function _childRender(childStr, isFirst) {
-	            var _this4 = this;
+	        value: function _childRender(childStr, isSelf) {
+	            var _this5 = this;
 
 	            if (this._omi_removed) {
 	                this.HTML = '<input type="hidden" omi_scoped_' + this.id + ' >';
 	                return this.HTML;
 	            }
-	            //childStr = childStr.replace("<child", "<div").replace("/>", "></div>");
-	            this._mergeData(childStr, isFirst);
-	            this._generateHTMLCSS();
-	            this._extractChildren(this);
-	            if (isFirst) {
-	                this.children.forEach(function (item, index) {
-	                    _this4._omi_order[index] = index;
-	                });
+	            //childStr = childStr.replace("<child", "<div").replace("/>", "></div>")
+	            this._mergeData(childStr);
+	            if (this.parent._omi_autoStoreToData) {
+	                this._omi_autoStoreToData = true;
+	                if (!this._omi_ignoreStoreData) {
+	                    this.data = this.$store.data;
+	                }
 	            }
-	            this.children.forEach(function (item, index) {
-	                _this4.HTML = _this4.HTML.replace(item._omiChildStr, _this4.children[_this4._omi_order[index]].HTML);
+	            this.beforeRender();
+	            this._fixSlot(this._generateHTMLCSS());
+	            if (!isSelf) {
+	                this._extractChildren(this);
+	            } else {
+	                this._extractChildrenString(this);
+	            }
+
+	            this.children.forEach(function (item) {
+	                _this5.HTML = _this5.HTML.replace(item._omiChildStr, isSelf ? item.node.outerHTML : item.HTML);
 	            });
 	            this.HTML = (0, _event2['default'])(this.HTML, this.id);
 	            return this.HTML;
+	        }
+	    }, {
+	        key: '_fixSlot',
+	        value: function _fixSlot(shareAttr) {
+	            var _this6 = this;
+
+	            if (!this._omi_slotContent) return;
+	            this._omi_slotContent = this._scopedAttr(this._omi_slotContent, this._omi_scoped_attr, shareAttr);
+	            var nodes = _morphdom2['default'].toElements(this._omi_slotContent);
+	            var slotMatch = this.HTML.match(/<slot[\s\S]*?<\/slot>/g);
+	            if (nodes.length === 1 && slotMatch && slotMatch.length === 1) {
+	                this.HTML = this.HTML.replace(/<slot[\s\S]*?<\/slot>/, this._omi_slotContent);
+	            } else {
+	                nodes.sort(function (a, b) {
+	                    return parseInt(a.getAttribute('slot-index')) - parseInt(b.getAttribute('slot-index'));
+	                });
+	                nodes.forEach(function (node) {
+	                    _this6.HTML = _this6.HTML.replace(/<slot[\s\S]*?<\/slot>/, node.outerHTML);
+	                });
+	            }
 	        }
 	    }, {
 	        key: '_queryElements',
@@ -1326,18 +1595,18 @@
 	            current.children.forEach(function (item) {
 	                item.node = current.node.querySelector("[" + _omi2['default'].STYLESCOPEDPREFIX + item.id + "]");
 	                //recursion get node prop from parent node
-	                current._queryElements(item);
+	                item.node && current._queryElements(item);
 	            });
 	        }
 	    }, {
 	        key: '_mixRefs',
 	        value: function _mixRefs() {
-	            var _this5 = this;
+	            var _this7 = this;
 
 	            var nodes = _omi2['default'].$$('*[ref]', this.node);
 	            nodes.forEach(function (node) {
-	                if (node.hasAttribute(_this5._omi_scoped_attr)) {
-	                    _this5.refs[node.getAttribute('ref')] = node;
+	                if (node.hasAttribute(_this7._omi_scoped_attr)) {
+	                    _this7.refs[node.getAttribute('ref')] = node;
 	                }
 	            });
 	            var attr = this.node.getAttribute('ref');
@@ -1348,28 +1617,29 @@
 	    }, {
 	        key: '_execPlugins',
 	        value: function _execPlugins() {
-	            var _this6 = this;
+	            var _this8 = this;
 
 	            Object.keys(_omi2['default'].plugins).forEach(function (item) {
-	                var nodes = _omi2['default'].$$('*[' + item + ']', _this6.node);
+	                var nodes = _omi2['default'].$$('*[' + item + ']', _this8.node);
 	                nodes.forEach(function (node) {
-	                    if (node.hasAttribute(_this6._omi_scoped_attr)) {
-	                        _omi2['default'].plugins[item](node, _this6);
+	                    if (node.hasAttribute(_this8._omi_scoped_attr)) {
+	                        _omi2['default'].plugins[item](node, _this8);
 	                    }
 	                });
-	                if (_this6.node.hasAttribute(item)) {
-	                    _omi2['default'].plugins[item](_this6.node, _this6);
+	                if (_this8.node.hasAttribute(item)) {
+	                    _omi2['default'].plugins[item](_this8.node, _this8);
 	                }
 	            });
 	        }
 	    }, {
 	        key: '_childrenInstalled',
 	        value: function _childrenInstalled(root) {
-	            var _this7 = this;
+	            var _this9 = this;
 
 	            root.children.forEach(function (child) {
+	                _this9._childrenInstalled(child);
 	                child.installed();
-	                _this7._childrenInstalled(child);
+	                child._execInstalledHandlers();
 	            });
 	        }
 	    }, {
@@ -1410,15 +1680,21 @@
 	        }
 	    }, {
 	        key: '_replaceTags',
-	        value: function _replaceTags(array, html) {
+	        value: function _replaceTags(array, html, updateSelf) {
+	            var _this10 = this;
+
+	            if (_omi2['default'].customTags.length === 0) return;
 	            var str = array.join("|");
-	            var reg = new RegExp('<(' + str + '+)((?:\\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\\s*=\\s*(?:(?:"[^"]*")|(?:\'[^\']*\')|[^>\\s]+))?)*)\\s*(\\/?)>', 'g');
-	            return html.replace(reg, function (m, a) {
-	                var d = m.length - 2;
-	                if (d >= 0 && m.lastIndexOf('/>') === m.length - 2) {
-	                    return m.replace('<' + a, '<child tag="' + a + '"').substr(0, m.length + 10) + '></child>';
-	                } else if (m.lastIndexOf('>') === m.length - 1) {
-	                    return m.replace('<' + a, '<child tag="' + a + '"') + '</child>';
+	            var reg = new RegExp('<(' + str + '+)((?:\\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\\s*=\\s*(?:(?:"[^"]*")|(?:\'[^\']*\')|[^>\\s]+))?)*)\\s*((\\/>)|>(([\\s\\S]*?)<\\/\\1>))', 'g');
+	            var index = 0;
+	            return html.replace(reg, function (m, a, b, c, d, e, f) {
+	                if (updateSelf) {
+	                    var cmi = _this10.children[index];
+	                    if (cmi && cmi.___omi_constructor_name === a) {
+	                        cmi._omiChildStr = m;
+	                    }
+	                } else {
+	                    _this10._initComponentByString(a, m, f, index++, _this10);
 	                }
 	            });
 	        }
@@ -1432,60 +1708,82 @@
 	        }
 	    }, {
 	        key: '_mergeData',
-	        value: function _mergeData(childStr, isFirst) {
-	            var arr = childStr.match(/\s+data=['|"](\S*)['|"][\s+|/]/);
-	            if (isFirst) {
-	                var parentData = arr ? this._extractPropertyFromString(RegExp.$1, this.parent) : null;
-	                var groupArr = childStr.match(/\s+group-data=['|"](\S*)['|"][\s+|/]/);
-	                this.data = Object.assign(this.data, this._dataset, parentData, groupArr ? this._extractPropertyFromString(RegExp.$1, this.parent)[this._omiGroupDataIndex] : null);
+	        value: function _mergeData(childStr) {
+	            if (this.selfDataFirst) {
+	                this.data = Object.assign({}, this._getDataset(childStr), this.data);
 	            } else {
-	                if (this.dataFirst) {
-	                    this.data = Object.assign({}, this._getDataset(childStr), this.data);
-	                } else {
-	                    this.data = Object.assign({}, this.data, this._getDataset(childStr));
-	                }
+	                this.data = Object.assign({}, this.data, this._getDataset(childStr));
 	            }
-	            isFirst && this.install();
 	        }
 	    }, {
 	        key: '_generateHTMLCSS',
 	        value: function _generateHTMLCSS() {
-	            this.CSS = this.style() || '';
+	            this.CSS = (this.style() || '').replace(/<\/?style>/g, '');
+	            var shareAttr = this.___omi_constructor_name ? _omi2['default'].STYLESCOPEDPREFIX + this.___omi_constructor_name.toLowerCase() : this._omi_scoped_attr;
 	            if (this.CSS) {
-	                this.CSS = _style2['default'].scoper(this.CSS, "[" + this._omi_scoped_attr + "]");
-	                if (this.CSS !== this._preCSS && !this._omi_server_rendering) {
-	                    _style2['default'].addStyle(this.CSS, this.id);
-	                    this._preCSS = this.CSS;
+	                if (this._omi_scopedSelfCSS || !_omi2['default'].style[shareAttr]) {
+	                    this.CSS = _style2['default'].scoper(this.CSS, this._omi_scopedSelfCSS ? "[" + this._omi_scoped_attr + "]" : "[" + shareAttr + "]");
+	                    _omi2['default'].style[shareAttr] = this.CSS;
+	                    if (this.CSS !== this._preCSS && !this._omi_server_rendering) {
+	                        _style2['default'].addStyle(this.CSS, this.id);
+	                        this._preCSS = this.CSS;
+	                    }
 	                }
 	            }
 	            var tpl = this.render();
-	            this.HTML = this._scopedAttr(_omi2['default'].template(tpl ? tpl : "", this.data), this._omi_scoped_attr).trim();
+	            this.HTML = this._scopedAttr(_omi2['default'].template(tpl ? tpl : "", this.data), this._omi_scoped_attr, shareAttr).trim();
 	            if (this._omi_server_rendering) {
 	                this.HTML = '\r\n<style id="' + _omi2['default'].STYLEPREFIX + this.id + '">\r\n' + this.CSS + '\r\n</style>\r\n' + this.HTML;
 	                this.HTML += '\r\n<input type="hidden" data-omi-id="' + this.id + '" class="' + _omi2['default'].STYLESCOPEDPREFIX + '_hidden_data" value=\'' + JSON.stringify(this.data) + '\'  />\r\n';
 	            }
+
+	            return shareAttr;
 	        }
 	    }, {
 	        key: '_scopedAttr',
-	        value: function _scopedAttr(html, id) {
+	        value: function _scopedAttr(html, id, shareAtrr) {
+	            var _this11 = this;
+
 	            return html.replace(/<[^/]([A-Za-z]*)[^>]*>/g, function (m) {
 	                var str = m.split(" ")[0].replace(">", "");
-	                return m.replace(str, str + " " + id);
+	                if (_this11._omi_scopedSelfCSS || !_this11.___omi_constructor_name) {
+	                    return m.replace(str, str + " " + id);
+	                } else {
+	                    return m.replace(str, str + " " + id + " " + shareAtrr);
+	                }
 	            });
 	        }
 	    }, {
 	        key: '_getDataset',
 	        value: function _getDataset(childStr) {
-	            var _this8 = this;
+	            var _this12 = this;
 
 	            var json = (0, _html2json2['default'])(childStr);
 	            var attr = json.child[0].attr;
+	            var baseData = {};
 	            Object.keys(attr).forEach(function (key) {
-	                if (key.indexOf('data-') === 0) {
-	                    _this8._dataset[_this8._capitalize(key.replace('data-', ''))] = attr[key];
+	                var value = attr[key];
+	                if (key.indexOf('on') === 0) {
+	                    var handler = _this12.parent[value];
+	                    if (handler) {
+	                        baseData[_this12._capitalize(key)] = handler.bind(_this12.parent);
+	                    }
+	                } else if (key.indexOf('data-') === 0) {
+	                    _this12._dataset[_this12._capitalize(key.replace('data-', ''))] = value;
+	                } else if (key.indexOf(':data-') === 0) {
+	                    _this12._dataset[_this12._capitalize(key.replace(':data-', ''))] = eval('(' + value + ')');
+	                } else if (key.indexOf('::data-') === 0) {
+	                    _this12._dataset[_this12._capitalize(key.replace('::data-', ''))] = _this12._extractPropertyFromString(value, _this12.parent);
+	                } else if (key === 'data') {
+	                    _this12._dataset = _this12._extractPropertyFromString(value, _this12.parent);
+	                } else if (key === ':data') {
+	                    _this12._dataset = eval('(' + value + ')');
+	                } else if (key === 'group-data') {
+	                    _this12._dataset = _this12._extractPropertyFromString(value, _this12.parent)[_this12._omi_groupDataIndex];
 	                }
 	            });
-	            return this._dataset;
+
+	            return Object.assign(baseData, this._dataset);
 	        }
 	    }, {
 	        key: '_capitalize',
@@ -1508,68 +1806,113 @@
 	            return current;
 	        }
 	    }, {
+	        key: '_extractChildrenString',
+	        value: function _extractChildrenString(child) {
+	            this._replaceTags(_omi2['default'].customTags, child.HTML, true);
+	        }
+	    }, {
 	        key: '_extractChildren',
 	        value: function _extractChildren(child) {
-	            var _this9 = this;
+	            this._replaceTags(_omi2['default'].customTags, child.HTML);
+	        }
+	    }, {
+	        key: '_initComponentByString',
+	        value: function _initComponentByString(name, childStr, slotContent, i, child) {
+	            var _this13 = this;
 
-	            if (_omi2['default'].customTags.length > 0) {
-	                child.HTML = this._replaceTags(_omi2['default'].customTags, child.HTML);
-	            }
-	            var arr = child.HTML.match(/<child[^>][\s\S]*?tag=['|"](\S*)['|"][\s\S]*?><\/child>/g);
-
-	            if (arr) {
-	                arr.forEach(function (childStr, i) {
-	                    var json = (0, _html2json2['default'])(childStr);
-	                    var attr = json.child[0].attr;
-	                    var name = attr.tag;
-	                    delete attr.tag;
-	                    var cmi = _this9.children[i];
-	                    //if not first time to invoke _extractChildren method
-	                    if (cmi && cmi.___omi_constructor_name === name) {
-	                        cmi._childRender(childStr);
-	                    } else {
-	                        (function () {
-	                            var ChildClass = _omi2['default'].getClassFromString(name);
-	                            if (!ChildClass) throw "Can't find Class called [" + name + "]";
-	                            var sub_child = new ChildClass(Object.assign({}, child.childrenData[i]), false);
-	                            sub_child._omiChildStr = childStr;
-	                            sub_child.parent = child;
-	                            sub_child.___omi_constructor_name = name;
-	                            sub_child._dataset = {};
-
-	                            Object.keys(attr).forEach(function (key) {
-	                                var value = attr[key];
-	                                if (key.indexOf('on') === 0) {
-	                                    var handler = sub_child.parent[value];
-	                                    if (handler) {
-	                                        sub_child.data[key] = handler.bind(sub_child.parent);
-	                                    }
-	                                } else if (key === 'group-data') {
-	                                    if (child._omiGroupDataCounter.hasOwnProperty(value)) {
-	                                        child._omiGroupDataCounter[value]++;
-	                                        sub_child._omiGroupDataIndex = child._omiGroupDataCounter[value];
-	                                    } else {
-	                                        sub_child._omiGroupDataIndex = child._omiGroupDataCounter[value] = 0;
-	                                    }
-	                                } else if (key === 'omi-id') {
-	                                    _omi2['default'].mapping[value] = sub_child;
-	                                } else if (key === 'name') {
-	                                    child[value] = sub_child;
-	                                } else if (key.indexOf('data-') === 0) {
-	                                    sub_child._dataset[_this9._capitalize(key.replace('data-', ''))] = value;
-	                                }
-	                            });
-
-	                            if (!cmi) {
-	                                child.children.push(sub_child);
-	                            } else {
-	                                child.children[i] = sub_child;
-	                            }
-
-	                            sub_child._childRender(childStr, true);
-	                        })();
+	            var json = (0, _html2json2['default'])(childStr);
+	            var attr = json.child[0].attr;
+	            var cmi = this.children[i];
+	            //if not first time to invoke _extractChildren method
+	            if (cmi && cmi.___omi_constructor_name === name) {
+	                cmi._omiChildStr = childStr;
+	                cmi._omi_slotContent = slotContent;
+	                Object.keys(attr).forEach(function (key) {
+	                    var value = attr[key];
+	                    if (key === 'group-data') {
+	                        if (child._omiGroupDataCounter.hasOwnProperty(value)) {
+	                            child._omiGroupDataCounter[value]++;
+	                        } else {
+	                            child._omiGroupDataCounter[value] = 0;
+	                        }
+	                        cmi._omi_groupDataIndex = child._omiGroupDataCounter[value];
 	                    }
 	                });
+
+	                cmi._childRender(childStr);
+	            } else {
+	                var baseData = {};
+	                var dataset = {};
+
+	                var groupDataIndex = null;
+	                var omiID = null;
+	                var instanceName = null;
+	                var _omi_option = {};
+
+	                Object.keys(attr).forEach(function (key) {
+	                    var value = attr[key];
+	                    if (key.indexOf('on') === 0) {
+	                        var handler = child[value];
+	                        if (handler) {
+	                            baseData[_this13._capitalize(key)] = handler.bind(child);
+	                        }
+	                    } else if (key === 'omi-id') {
+	                        omiID = value;
+	                    } else if (key === 'name') {
+	                        instanceName = value;
+	                    } else if (key === 'group-data') {
+	                        if (child._omiGroupDataCounter.hasOwnProperty(value)) {
+	                            child._omiGroupDataCounter[value]++;
+	                        } else {
+	                            child._omiGroupDataCounter[value] = 0;
+	                        }
+	                        groupDataIndex = child._omiGroupDataCounter[value];
+	                        dataset = _this13._extractPropertyFromString(value, child)[groupDataIndex];
+	                    } else if (key.indexOf('data-') === 0) {
+	                        dataset[_this13._capitalize(key.replace('data-', ''))] = value;
+	                    } else if (key.indexOf(':data-') === 0) {
+	                        dataset[_this13._capitalize(key.replace(':data-', ''))] = eval('(' + value + ')');
+	                    } else if (key.indexOf('::data-') === 0) {
+	                        dataset[_this13._capitalize(key.replace('::data-', ''))] = _this13._extractPropertyFromString(value, child);
+	                    } else if (key === 'data') {
+	                        dataset = _this13._extractPropertyFromString(value, child);
+	                    } else if (key === ':data') {
+	                        dataset = eval('(' + value + ')');
+	                    } else if (key === 'preventSelfUpdate' || key === 'psu' || key === 'preventselfupdate') {
+	                        _omi_option.preventSelfUpdate = true;
+	                    } else if (key === 'selfDataFirst' || key === 'sdf' || key === 'selfdatafirst') {
+	                        _omi_option.selfDataFirst = true;
+	                    } else if (key === 'domDiffDisabled' || key === 'ddd' || key === 'domdiffdisabled') {
+	                        _omi_option.domDiffDisabled = true;
+	                    } else if (key === 'ignoreStoreData' || key === 'isd' || key === 'ignorestoredata') {
+	                        _omi_option.ignoreStoreData = true;
+	                    } else if (key === 'scopedSelfCSS' || key === 'ssc' || key === 'scopedselfcss') {
+	                        _omi_option.scopedSelfCSS = true;
+	                    }
+	                });
+
+	                var ChildClass = _omi2['default'].getClassFromString(name);
+	                if (!ChildClass) throw "Can't find Class called [" + name + "]";
+	                var sub_child = new ChildClass(Object.assign(baseData, dataset), _omi_option);
+	                sub_child._omi_groupDataIndex = groupDataIndex;
+	                sub_child._omiChildStr = childStr;
+	                sub_child._omi_slotContent = slotContent;
+	                sub_child.parent = child;
+	                sub_child.$store = child.$store;
+	                sub_child.___omi_constructor_name = name;
+	                sub_child._dataset = {};
+	                sub_child.install();
+
+	                omiID && (_omi2['default'].mapping[omiID] = sub_child);
+	                instanceName && (child[instanceName] = sub_child);
+
+	                if (!cmi) {
+	                    child.children.push(sub_child);
+	                } else {
+	                    child.children[i] = sub_child;
+	                }
+
+	                sub_child._childRender(childStr);
 	            }
 	        }
 	    }]);
@@ -1579,11 +1922,11 @@
 
 	exports['default'] = Component;
 
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -1593,36 +1936,42 @@
 
 	var _omi2 = _interopRequireDefault(_omi);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 	//many thanks to https://github.com/thomaspark/scoper/
 	function scoper(css, prefix) {
-	    var re = new RegExp("([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)", "g");
-	    css = css.replace(re, function (g0, g1, g2) {
+	    //https://www.w3.org/TR/css-syntax-3/#lexical
+	    css = css.replace(/\/\*[^*]*\*+([^/][^*]*\*+)*\//g, '');
+
+	    var re = new RegExp("([^\r\n,{}:]+)(:[^\r\n,{}]+)?(,(?=[^{}]*{)|\s*{)", "g");
+	    /**
+	     * Example:
+	     *
+	     * .classname::pesudo { color:red }
+	     *
+	     * g1 is normal selector `.classname`
+	     * g2 is pesudo class or pesudo element
+	     * g3 is the suffix
+	     */
+	    css = css.replace(re, function (g0, g1, g2, g3) {
+	        if (typeof g2 === "undefined") {
+	            g2 = "";
+	        }
 
 	        if (g1.match(/^\s*(@media|@keyframes|to|from|@font-face)/)) {
-	            return g1 + g2;
+	            return g1 + g2 + g3;
 	        }
 
-	        if (g1.match(/:scope/)) {
-	            g1 = g1.replace(/([^\s]*):scope/, function (h0, h1) {
-	                if (h1 === "") {
-	                    return "> *";
-	                } else {
-	                    return "> " + h1;
-	                }
-	            });
-	        }
-
-	        g1 = g1.replace(/^(\s*)/, g1.trim() + prefix + "," + "$1" + prefix + " ").replace(/\s+/g, ' ');
-	        return g1 + g2;
+	        var appendClass = g1.replace(/(\s*)$/, "") + prefix + g2;
+	        var prependClass = prefix + " " + g1.trim() + g2;
+	        return appendClass + "," + prependClass + g3;
 	    });
 
 	    return css;
 	}
 
 	function addStyle(cssText, id) {
-	    var ele = document.getElementById(_omi2["default"].STYLEPREFIX + id),
+	    var ele = document.getElementById(_omi2['default'].STYLEPREFIX + id),
 	        head = document.getElementsByTagName('head')[0];
 	    if (ele && ele.parentNode === head) {
 	        head.removeChild(ele);
@@ -1631,7 +1980,7 @@
 	    var someThingStyles = document.createElement('style');
 	    head.appendChild(someThingStyles);
 	    someThingStyles.setAttribute('type', 'text/css');
-	    someThingStyles.setAttribute('id', _omi2["default"].STYLEPREFIX + id);
+	    someThingStyles.setAttribute('id', _omi2['default'].STYLEPREFIX + id);
 	    if (!!window.ActiveXObject) {
 	        someThingStyles.styleSheet.cssText = cssText;
 	    } else {
@@ -1639,253 +1988,768 @@
 	    }
 	}
 
-	exports["default"] = {
+	exports['default'] = {
 	    scoper: scoper,
 	    addStyle: addStyle
 	};
 
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	function scopedEvent(tpl, id) {
-	    return tpl.replace(/<[\s\S]*?>/g, function (item) {
-	        return item.replace(/on(abort|blur|cancel|canplay|canplaythrough|change|click|close|contextmenu|cuechange|dblclick|drag|dragend|dragenter|dragleave|dragover|dragstart|drop|durationchange|emptied|ended|error|focus|input|invalid|keydown|keypress|keyup|load|loadeddata|loadedmetadata|loadstart|mousedown|mouseenter|mouseleave|mousemove|mouseout|mouseover|mouseup|mousewheel|pause|play|playing|progress|ratechange|reset|resize|scroll|seeked|seeking|select|show|stalled|submit|suspend|timeupdate|toggle|volumechange|waiting|autocomplete|autocompleteerror|beforecopy|beforecut|beforepaste|copy|cut|paste|search|selectstart|wheel|webkitfullscreenchange|webkitfullscreenerror|touchstart|touchmove|touchend|touchcancel|pointerdown|pointerup|pointercancel|pointermove|pointerover|pointerout|pointerenter|pointerleave|Abort|Blur|Cancel|CanPlay|CanPlayThrough|Change|Click|Close|ContextMenu|CueChange|DblClick|Drag|DragEnd|DragEnter|DragLeave|DragOver|DragStart|Drop|DurationChange|Emptied|Ended|Error|Focus|Input|Invalid|KeyDown|KeyPress|KeyUp|Load|LoadedData|LoadedMetadata|LoadStart|MouseDown|MouseEnter|MouseLeave|MouseMove|MouseOut|MouseOver|MouseUp|MouseWheel|Pause|Play|Playing|Progress|RateChange|Reset|Resize|Scroll|Seeked|Seeking|Select|Show|Stalled|Submit|Suspend|TimeUpdate|Toggle|VolumeChange|Waiting|AutoComplete|AutoCompleteError|BeforeCopy|BeforeCut|BeforePaste|Copy|Cut|Paste|Search|SelectStart|Wheel|WebkitFullScreenChange|WebkitFullScreenError|TouchStart|TouchMove|TouchEnd|TouchCancel|PointerDown|PointerUp|PointerCancel|PointerMove|PointerOver|PointerOut|PointerEnter|PointerLeave)=('|")/g, function (eventStr, b, c, d, e) {
-	            if (e.substr(eventStr.length + d, 14) === "Omi.instances[") return eventStr;
-	            return eventStr += "Omi.instances[" + id + "].";
-	        });
-	    });
-	};
-
-	exports["default"] = scopedEvent;
-
-/***/ },
+/***/ }),
 /* 7 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	var NODE_INDEX = '__set-dom-index__';
-	var ELEMENT_TYPE = 1;
-	var DOCUMENT_TYPE = 9;
-	var HTML_ELEMENT = document.createElement('html');
-	var BODY_ELEMENT = document.createElement('body');
-
-	var isIE = function isIE(ver) {
-	    var b = document.createElement('b');
-	    b.innerHTML = '<!--[if IE ' + ver + ']><i></i><![endif]-->';
-	    return b.getElementsByTagName('i').length === 1;
-	};
-
-	/**
-	 * @description
-	 * Updates existing dom to match a new dom.
-	 *
-	 * @param {HTMLEntity} prev - The html entity to update.
-	 * @param {String|HTMLEntity} next - The updated html(entity).
-	 */
-	function setDOM(prev, next) {
-	    // Ensure a realish dom node is provided.
-	    assert(prev && prev.nodeType, 'You must provide a valid node to update.');
-
-	    // Alias document element with document.
-	    if (prev.nodeType === DOCUMENT_TYPE) prev = prev.documentElement;
-
-	    // If a string was provided we will parse it as dom.
-	    if (typeof next === 'string') {
-	        if (prev === document.documentElement) {
-	            HTML_ELEMENT.innerHTML = next;
-	            next = HTML_ELEMENT;
-	        } else {
-	            BODY_ELEMENT.innerHTML = next;
-	            next = BODY_ELEMENT.firstChild;
-	        }
-	    }
-
-	    if (isIE(8)) {
-	        prev.parentNode.replaceChild(next, prev);
-	        return;
-	    }
-	    // Update the node.
-	    setNode(prev, next);
+	function scopedEvent(tpl, id) {
+	    return tpl.replace(/<[\s\S]*?>/g, function (item) {
+	        return item.replace(/on(abort|blur|cancel|canplay|canplaythrough|change|click|close|contextmenu|cuechange|dblclick|drag|dragend|dragenter|dragleave|dragover|dragstart|drop|durationchange|emptied|ended|error|focus|input|invalid|keydown|keypress|keyup|load|loadeddata|loadedmetadata|loadstart|mousedown|mouseenter|mouseleave|mousemove|mouseout|mouseover|mouseup|mousewheel|pause|play|playing|progress|ratechange|reset|resize|scroll|seeked|seeking|select|show|stalled|submit|suspend|timeupdate|toggle|volumechange|waiting|autocomplete|autocompleteerror|beforecopy|beforecut|beforepaste|copy|cut|paste|search|selectstart|wheel|webkitfullscreenchange|webkitfullscreenerror|touchstart|touchmove|touchend|touchcancel|pointerdown|pointerup|pointercancel|pointermove|pointerover|pointerout|pointerenter|pointerleave|Abort|Blur|Cancel|CanPlay|CanPlayThrough|Change|Click|Close|ContextMenu|CueChange|DblClick|Drag|DragEnd|DragEnter|DragLeave|DragOver|DragStart|Drop|DurationChange|Emptied|Ended|Error|Focus|Input|Invalid|KeyDown|KeyPress|KeyUp|Load|LoadedData|LoadedMetadata|LoadStart|MouseDown|MouseEnter|MouseLeave|MouseMove|MouseOut|MouseOver|MouseUp|MouseWheel|Pause|Play|Playing|Progress|RateChange|Reset|Resize|Scroll|Seeked|Seeking|Select|Show|Stalled|Submit|Suspend|TimeUpdate|Toggle|VolumeChange|Waiting|AutoComplete|AutoCompleteError|BeforeCopy|BeforeCut|BeforePaste|Copy|Cut|Paste|Search|SelectStart|Wheel|WebkitFullScreenChange|WebkitFullScreenError|TouchStart|TouchMove|TouchEnd|TouchCancel|PointerDown|PointerUp|PointerCancel|PointerMove|PointerOver|PointerOut|PointerEnter|PointerLeave)=(('([\s\S]*?)')|("([\s\S]*?)"))/g, function (eventStr, b, c) {
+	            if (c.indexOf('Omi.instances[') === 1) {
+	                return eventStr;
+	            } else if (c.lastIndexOf(')') === c.length - 2) {
+	                return eventStr.replace(/=(['|"])/, '=$1Omi.instances[' + id + '].');
+	            } else {
+	                var str = eventStr.replace(/=(['|"])/, '=$1Omi.instances[' + id + '].');
+	                return str.substr(0, str.length - 1) + "(event)" + str.substr(str.length - 1, 1);
+	            }
+	        });
+	    });
 	}
 
-	/**
-	 * @private
-	 * @description
-	 * Updates a specific htmlNode and does whatever it takes to convert it to another one.
-	 *
-	 * @param {HTMLEntity} prev - The previous HTMLNode.
-	 * @param {HTMLEntity} next - The updated HTMLNode.
-	 */
-	function setNode(prev, next) {
-	    // Handle regular element node updates.
-	    if (prev.nodeType === ELEMENT_TYPE) {
-	        // Update all children (and subchildren).
-	        setChildNodes(prev, prev.childNodes, next.childNodes);
+	exports['default'] = scopedEvent;
 
-	        // Update the elements attributes / tagName.
-	        if (prev.nodeName === next.nodeName) {
-	            // If we have the same nodename then we can directly update the attributes.
-	            setAttributes(prev, prev.attributes, next.attributes);
-	        } else {
-	            // Otherwise clone the new node to use as the existing node.
-	            var newPrev = next.cloneNode();
-	            // Copy over all existing children from the original node.
-	            while (prev.firstChild) {
-	                newPrev.appendChild(prev.firstChild);
-	            } // Replace the original node with the new one with the right tag.
-	            prev.parentNode.replaceChild(newPrev, prev);
-	        }
-	    } else if (prev.nodeType === next.nodeType) {
-	        // Handle other types of node updates (text/comments/etc).
-	        // If both are the same type of node we can update directly.
-	        prev.nodeValue = next.nodeValue;
-	    } else {
-	        // we have to replace the node.
-	        prev.parentNode.replaceChild(next, prev);
-	    }
-	}
-
-	/*
-	 * @private
-	 * @description
-	 * Utility that will update one list of attributes to match another.
-	 *
-	 * @param {HTMLEntity} parent - The current parentNode being updated.
-	 * @param {Attributes} prev - The previous attributes.
-	 * @param {Attributes} next - The updated attributes.
-	 */
-	function setAttributes(parent, prev, next) {
-	    var i, a, b, ns;
-
-	    // Remove old attributes.
-	    for (i = prev.length; i--;) {
-	        a = prev[i];
-	        ns = a.namespaceURI;
-	        b = next.getNamedItemNS(ns, a.name);
-	        if (!b) prev.removeNamedItemNS(ns, a.name);
-	    }
-
-	    // Set new attributes.
-	    for (i = next.length; i--;) {
-	        a = next[i];
-	        ns = a.namespaceURI;
-	        b = prev.getNamedItemNS(ns, a.name);
-	        if (!b) {
-	            // Add a new attribute.
-	            next.removeNamedItemNS(ns, a.name);
-	            prev.setNamedItemNS(a);
-	        } else if (b.value !== a.value) {
-	            // Update existing attribute.
-	            b.value = a.value;
-	        }
-	    }
-	}
-
-	/*
-	 * @private
-	 * @description
-	 * Utility that will update one list of childNodes to match another.
-	 *
-	 * @param {HTMLEntity} parent - The current parentNode being updated.
-	 * @param {NodeList} prevChildNodes - The previous children.
-	 * @param {NodeList} nextChildNodes - The updated children.
-	 */
-	function setChildNodes(parent, prevChildNodes, nextChildNodes) {
-	    var key, a, b, oldPosition, newPosition;
-
-	    // Convert nodelists into a usuable map.
-	    var prev = keyNodes(prevChildNodes);
-	    var next = keyNodes(nextChildNodes);
-
-	    // Remove old nodes.
-	    for (key in prev) {
-	        if (next[key]) continue;
-	        parent.removeChild(prev[key]);
-	    }
-
-	    // Set new nodes.
-	    for (key in next) {
-	        a = prev[key];
-	        b = next[key];
-	        if (a) {
-	            // Update an existing node.
-	            setNode(a, b);
-	            // Check if the node has moved in the tree.
-	            oldPosition = a[NODE_INDEX];
-	            newPosition = b[NODE_INDEX];
-	            if (oldPosition === newPosition) continue;
-	            // Check if the node has already been properly positioned.
-	            if (prevChildNodes[newPosition] === a) continue;
-	            // Reposition node.
-	            parent.insertBefore(a, prevChildNodes[newPosition]);
-	        } else {
-	            // Append the new node.
-	            parent.appendChild(b);
-	        }
-	    }
-	}
-
-	/**
-	 * @private
-	 * @description
-	 * Converts a nodelist into a keyed map.
-	 * This is used for diffing while keeping elements with 'data-key' or 'id' if possible.
-	 *
-	 * @param {NodeList} childNodes - The childNodes to convert.
-	 * @return {Object}
-	 */
-	function keyNodes(childNodes) {
-	    var result = {};
-
-	    for (var i = childNodes.length, el; i--;) {
-	        el = childNodes[i];
-	        el[NODE_INDEX] = i;
-	        result[getKey(el) || i] = el;
-	    }
-
-	    return result;
-	}
-
-	/**
-	 * @private
-	 * @description
-	 * Utility to try to pull a key out of an element.
-	 * (Uses 'id' if possible and falls back to 'data-key')
-	 *
-	 * @param {HTMLEntity} node - The node to get the key for.
-	 * @return {String}
-	 */
-	function getKey(node) {
-	    if (node.nodeType !== ELEMENT_TYPE) return;
-	    return node.getAttribute('data-key') || node.id;
-	}
-
-	/**
-	 * Confirm that a value is truthy, throws an error message otherwise.
-	 *
-	 * @param {*} val - the val to test.
-	 * @param {String} msg - the error message on failure.
-	 * @throws Error
-	 */
-	function assert(val, msg) {
-	    if (!val) throw new Error('set-dom: ' + msg);
-	}
-
-	exports['default'] = setDOM;
-
-/***/ },
+/***/ }),
 /* 8 */
-/***/ function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;'use strict';
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+	(function (global, factory) {
+	    ( false ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory() :  true ? !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : global.morphdom = factory();
+	})(undefined, function () {
+	    'use strict';
+
+	    var range; // Create a range object for efficently rendering strings to elements.
+	    var NS_XHTML = 'http://www.w3.org/1999/xhtml';
+
+	    var doc = typeof document === 'undefined' ? undefined : document;
+
+	    var testEl = doc ? doc.body || doc.createElement('div') : {};
+
+	    // Fixes <https://github.com/patrick-steele-idem/morphdom/issues/32>
+	    // (IE7+ support) <=IE7 does not support el.hasAttribute(name)
+	    var actualHasAttributeNS;
+
+	    if (testEl.hasAttributeNS) {
+	        actualHasAttributeNS = function actualHasAttributeNS(el, namespaceURI, name) {
+	            return el.hasAttributeNS(namespaceURI, name);
+	        };
+	    } else if (testEl.hasAttribute) {
+	        actualHasAttributeNS = function actualHasAttributeNS(el, namespaceURI, name) {
+	            return el.hasAttribute(name);
+	        };
+	    } else {
+	        actualHasAttributeNS = function actualHasAttributeNS(el, namespaceURI, name) {
+	            return el.getAttributeNode(namespaceURI, name) != null;
+	        };
+	    }
+
+	    var hasAttributeNS = actualHasAttributeNS;
+
+	    function toElement(str) {
+	        if (!range && doc.createRange) {
+	            range = doc.createRange();
+	            range.selectNode(doc.body);
+	        }
+
+	        var fragment;
+	        if (range && range.createContextualFragment) {
+	            fragment = range.createContextualFragment(str);
+	        } else {
+	            fragment = doc.createElement('body');
+	            fragment.innerHTML = str;
+	        }
+	        return fragment.childNodes[0];
+	    }
+
+	    function toElements(str) {
+	        if (!range && doc.createRange) {
+	            range = doc.createRange();
+	            range.selectNode(doc.body);
+	        }
+
+	        var fragment;
+	        if (range && range.createContextualFragment) {
+	            fragment = range.createContextualFragment(str);
+	        } else {
+	            fragment = doc.createElement('body');
+	            fragment.innerHTML = str;
+	        }
+
+	        var arr = [],
+	            i = 0,
+	            len = fragment.childNodes.length;
+	        for (; i < len; i++) {
+	            var item = fragment.childNodes[i];
+	            if (item.nodeType === 1) {
+	                arr.push(item);
+	            }
+	        }
+	        return arr;
+	    }
+
+	    /**
+	     * Returns true if two node's names are the same.
+	     *
+	     * NOTE: We don't bother checking `namespaceURI` because you will never find two HTML elements with the same
+	     *       nodeName and different namespace URIs.
+	     *
+	     * @param {Element} a
+	     * @param {Element} b The target element
+	     * @return {boolean}
+	     */
+	    function compareNodeNames(fromEl, toEl) {
+	        var fromNodeName = fromEl.nodeName;
+	        var toNodeName = toEl.nodeName;
+
+	        if (fromNodeName === toNodeName) {
+	            return true;
+	        }
+
+	        if (toEl.actualize && fromNodeName.charCodeAt(0) < 91 && /* from tag name is upper case */
+	        toNodeName.charCodeAt(0) > 90 /* target tag name is lower case */) {
+	                // If the target element is a virtual DOM node then we may need to normalize the tag name
+	                // before comparing. Normal HTML elements that are in the "http://www.w3.org/1999/xhtml"
+	                // are converted to upper case
+	                return fromNodeName === toNodeName.toUpperCase();
+	            } else {
+	            return false;
+	        }
+	    }
+
+	    /**
+	     * Create an element, optionally with a known namespace URI.
+	     *
+	     * @param {string} name the element name, e.g. 'div' or 'svg'
+	     * @param {string} [namespaceURI] the element's namespace URI, i.e. the value of
+	     * its `xmlns` attribute or its inferred namespace.
+	     *
+	     * @return {Element}
+	     */
+	    function createElementNS(name, namespaceURI) {
+	        return !namespaceURI || namespaceURI === NS_XHTML ? doc.createElement(name) : doc.createElementNS(namespaceURI, name);
+	    }
+
+	    /**
+	     * Copies the children of one DOM element to another DOM element
+	     */
+	    function moveChildren(fromEl, toEl) {
+	        var curChild = fromEl.firstChild;
+	        while (curChild) {
+	            var nextChild = curChild.nextSibling;
+	            toEl.appendChild(curChild);
+	            curChild = nextChild;
+	        }
+	        return toEl;
+	    }
+
+	    function morphAttrs(fromNode, toNode) {
+	        var attrs = toNode.attributes;
+	        var i;
+	        var attr;
+	        var attrName;
+	        var attrNamespaceURI;
+	        var attrValue;
+	        var fromValue;
+
+	        for (i = attrs.length - 1; i >= 0; --i) {
+	            attr = attrs[i];
+	            attrName = attr.name;
+	            attrNamespaceURI = attr.namespaceURI;
+	            attrValue = attr.value;
+
+	            if (attrNamespaceURI) {
+	                attrName = attr.localName || attrName;
+	                fromValue = fromNode.getAttributeNS(attrNamespaceURI, attrName);
+
+	                if (fromValue !== attrValue) {
+	                    fromNode.setAttributeNS(attrNamespaceURI, attrName, attrValue);
+	                }
+	            } else {
+	                fromValue = fromNode.getAttribute(attrName);
+
+	                if (fromValue !== attrValue) {
+	                    fromNode.setAttribute(attrName, attrValue);
+	                }
+	            }
+	        }
+
+	        // Remove any extra attributes found on the original DOM element that
+	        // weren't found on the target element.
+	        attrs = fromNode.attributes;
+
+	        for (i = attrs.length - 1; i >= 0; --i) {
+	            attr = attrs[i];
+	            if (attr.specified !== false) {
+	                attrName = attr.name;
+	                attrNamespaceURI = attr.namespaceURI;
+
+	                if (attrNamespaceURI) {
+	                    attrName = attr.localName || attrName;
+
+	                    if (!hasAttributeNS(toNode, attrNamespaceURI, attrName)) {
+	                        fromNode.removeAttributeNS(attrNamespaceURI, attrName);
+	                    }
+	                } else {
+	                    if (!hasAttributeNS(toNode, null, attrName)) {
+	                        fromNode.removeAttribute(attrName);
+	                    }
+	                }
+	            }
+	        }
+	    }
+
+	    function syncBooleanAttrProp(fromEl, toEl, name) {
+	        if (fromEl[name] !== toEl[name]) {
+	            fromEl[name] = toEl[name];
+	            if (fromEl[name]) {
+	                fromEl.setAttribute(name, '');
+	            } else {
+	                fromEl.removeAttribute(name, '');
+	            }
+	        }
+	    }
+
+	    var specialElHandlers = {
+	        /**
+	         * Needed for IE. Apparently IE doesn't think that "selected" is an
+	         * attribute when reading over the attributes using selectEl.attributes
+	         */
+	        OPTION: function OPTION(fromEl, toEl) {
+	            syncBooleanAttrProp(fromEl, toEl, 'selected');
+	        },
+	        /**
+	         * The "value" attribute is special for the <input> element since it sets
+	         * the initial value. Changing the "value" attribute without changing the
+	         * "value" property will have no effect since it is only used to the set the
+	         * initial value.  Similar for the "checked" attribute, and "disabled".
+	         */
+	        INPUT: function INPUT(fromEl, toEl) {
+	            syncBooleanAttrProp(fromEl, toEl, 'checked');
+	            syncBooleanAttrProp(fromEl, toEl, 'disabled');
+
+	            if (fromEl.value !== toEl.value) {
+	                fromEl.value = toEl.value;
+	            }
+
+	            if (!hasAttributeNS(toEl, null, 'value')) {
+	                fromEl.removeAttribute('value');
+	            }
+	        },
+
+	        TEXTAREA: function TEXTAREA(fromEl, toEl) {
+	            var newValue = toEl.value;
+	            if (fromEl.value !== newValue) {
+	                fromEl.value = newValue;
+	            }
+
+	            if (fromEl.firstChild) {
+	                // Needed for IE. Apparently IE sets the placeholder as the
+	                // node value and vise versa. This ignores an empty update.
+	                if (newValue === '' && fromEl.firstChild.nodeValue === fromEl.placeholder) {
+	                    return;
+	                }
+
+	                fromEl.firstChild.nodeValue = newValue;
+	            }
+	        },
+	        SELECT: function SELECT(fromEl, toEl) {
+	            if (!hasAttributeNS(toEl, null, 'multiple')) {
+	                var selectedIndex = -1;
+	                var i = 0;
+	                var curChild = toEl.firstChild;
+	                while (curChild) {
+	                    var nodeName = curChild.nodeName;
+	                    if (nodeName && nodeName.toUpperCase() === 'OPTION') {
+	                        if (hasAttributeNS(curChild, null, 'selected')) {
+	                            selectedIndex = i;
+	                            break;
+	                        }
+	                        i++;
+	                    }
+	                    curChild = curChild.nextSibling;
+	                }
+
+	                fromEl.selectedIndex = i;
+	            }
+	        }
+	    };
+
+	    var ELEMENT_NODE = 1;
+	    var TEXT_NODE = 3;
+	    var COMMENT_NODE = 8;
+
+	    function noop() {}
+
+	    function defaultGetNodeKey(node) {
+	        return node.id;
+	    }
+
+	    function morphdomFactory(morphAttrs) {
+
+	        return function morphdom(fromNode, toNode, options) {
+	            if (!options) {
+	                options = {};
+	            }
+
+	            if (typeof toNode === 'string') {
+	                if (fromNode.nodeName === '#document' || fromNode.nodeName === 'HTML') {
+	                    var toNodeHtml = toNode;
+	                    toNode = doc.createElement('html');
+	                    toNode.innerHTML = toNodeHtml;
+	                } else {
+	                    toNode = toElement(toNode);
+	                }
+	            }
+
+	            var getNodeKey = options.getNodeKey || defaultGetNodeKey;
+	            var onBeforeNodeAdded = options.onBeforeNodeAdded || noop;
+	            var onNodeAdded = options.onNodeAdded || noop;
+	            var onBeforeElUpdated = options.onBeforeElUpdated || noop;
+	            var onElUpdated = options.onElUpdated || noop;
+	            var onBeforeNodeDiscarded = options.onBeforeNodeDiscarded || noop;
+	            var onNodeDiscarded = options.onNodeDiscarded || noop;
+	            var onBeforeElChildrenUpdated = options.onBeforeElChildrenUpdated || noop;
+	            var childrenOnly = options.childrenOnly === true;
+	            var ignoreAttr = options.ignoreAttr;
+	            // This object is used as a lookup to quickly find all keyed elements in the original DOM tree.
+	            var fromNodesLookup = {};
+	            var keyedRemovalList;
+
+	            function addKeyedRemoval(key) {
+	                if (keyedRemovalList) {
+	                    keyedRemovalList.push(key);
+	                } else {
+	                    keyedRemovalList = [key];
+	                }
+	            }
+
+	            function walkDiscardedChildNodes(node, skipKeyedNodes) {
+	                if (node.nodeType === ELEMENT_NODE) {
+	                    var curChild = node.firstChild;
+	                    while (curChild) {
+
+	                        var key = undefined;
+
+	                        if (skipKeyedNodes && (key = getNodeKey(curChild))) {
+	                            // If we are skipping keyed nodes then we add the key
+	                            // to a list so that it can be handled at the very end.
+	                            addKeyedRemoval(key);
+	                        } else {
+	                            // Only report the node as discarded if it is not keyed. We do this because
+	                            // at the end we loop through all keyed elements that were unmatched
+	                            // and then discard them in one final pass.
+	                            onNodeDiscarded(curChild);
+	                            if (curChild.firstChild) {
+	                                walkDiscardedChildNodes(curChild, skipKeyedNodes);
+	                            }
+	                        }
+
+	                        curChild = curChild.nextSibling;
+	                    }
+	                }
+	            }
+
+	            /**
+	             * Removes a DOM node out of the original DOM
+	             *
+	             * @param  {Node} node The node to remove
+	             * @param  {Node} parentNode The nodes parent
+	             * @param  {Boolean} skipKeyedNodes If true then elements with keys will be skipped and not discarded.
+	             * @return {undefined}
+	             */
+	            function removeNode(node, parentNode, skipKeyedNodes) {
+	                if (onBeforeNodeDiscarded(node) === false) {
+	                    return;
+	                }
+
+	                if (parentNode) {
+	                    parentNode.removeChild(node);
+	                }
+
+	                onNodeDiscarded(node);
+	                walkDiscardedChildNodes(node, skipKeyedNodes);
+	            }
+
+	            // // TreeWalker implementation is no faster, but keeping this around in case this changes in the future
+	            // function indexTree(root) {
+	            //     var treeWalker = document.createTreeWalker(
+	            //         root,
+	            //         NodeFilter.SHOW_ELEMENT);
+	            //
+	            //     var el;
+	            //     while((el = treeWalker.nextNode())) {
+	            //         var key = getNodeKey(el);
+	            //         if (key) {
+	            //             fromNodesLookup[key] = el;
+	            //         }
+	            //     }
+	            // }
+
+	            // // NodeIterator implementation is no faster, but keeping this around in case this changes in the future
+	            //
+	            // function indexTree(node) {
+	            //     var nodeIterator = document.createNodeIterator(node, NodeFilter.SHOW_ELEMENT);
+	            //     var el;
+	            //     while((el = nodeIterator.nextNode())) {
+	            //         var key = getNodeKey(el);
+	            //         if (key) {
+	            //             fromNodesLookup[key] = el;
+	            //         }
+	            //     }
+	            // }
+
+	            function indexTree(node) {
+	                if (node.nodeType === ELEMENT_NODE) {
+	                    var curChild = node.firstChild;
+	                    while (curChild) {
+	                        var key = getNodeKey(curChild);
+	                        if (key) {
+	                            fromNodesLookup[key] = curChild;
+	                        }
+
+	                        // Walk recursively
+	                        indexTree(curChild);
+
+	                        curChild = curChild.nextSibling;
+	                    }
+	                }
+	            }
+
+	            indexTree(fromNode);
+
+	            function handleNodeAdded(el) {
+	                onNodeAdded(el);
+
+	                var curChild = el.firstChild;
+	                while (curChild) {
+	                    var nextSibling = curChild.nextSibling;
+
+	                    var key = getNodeKey(curChild);
+	                    if (key) {
+	                        var unmatchedFromEl = fromNodesLookup[key];
+	                        if (unmatchedFromEl && compareNodeNames(curChild, unmatchedFromEl)) {
+	                            curChild.parentNode.replaceChild(unmatchedFromEl, curChild);
+	                            morphEl(unmatchedFromEl, curChild);
+	                        }
+	                    }
+
+	                    handleNodeAdded(curChild);
+	                    curChild = nextSibling;
+	                }
+	            }
+
+	            function morphEl(fromEl, toEl, childrenOnly) {
+	                if (ignoreAttr) {
+	                    var ignoreF = false,
+	                        ignoreT = false,
+	                        attrF = null,
+	                        attrT = null;
+	                    for (var _i = 0, _len = ignoreAttr.length; _i < _len; _i++) {
+	                        var selector = ignoreAttr[_i];
+	                        if (!ignoreF && fromEl.getAttribute(selector) !== null) {
+	                            ignoreF = true;
+	                            attrF = selector;
+	                        }
+	                        if (!ignoreT && toEl.getAttribute(selector) !== null) {
+	                            ignoreT = true;
+	                            attrT = selector;
+	                        }
+	                        if (ignoreF && ignoreT) break;
+	                    }
+	                    if (ignoreF && ignoreT && attrF === attrT) {
+	                        return;
+	                    }
+	                }
+	                var toElKey = getNodeKey(toEl);
+	                var curFromNodeKey;
+
+	                if (toElKey) {
+	                    // If an element with an ID is being morphed then it is will be in the final
+	                    // DOM so clear it out of the saved elements collection
+	                    delete fromNodesLookup[toElKey];
+	                }
+
+	                if (toNode.isSameNode && toNode.isSameNode(fromNode)) {
+	                    return;
+	                }
+
+	                if (!childrenOnly) {
+	                    if (onBeforeElUpdated(fromEl, toEl) === false) {
+	                        return;
+	                    }
+
+	                    morphAttrs(fromEl, toEl);
+	                    onElUpdated(fromEl);
+
+	                    if (onBeforeElChildrenUpdated(fromEl, toEl) === false) {
+	                        return;
+	                    }
+	                }
+
+	                if (fromEl.nodeName !== 'TEXTAREA') {
+	                    var curToNodeChild = toEl.firstChild;
+	                    var curFromNodeChild = fromEl.firstChild;
+	                    var curToNodeKey;
+
+	                    var fromNextSibling;
+	                    var toNextSibling;
+	                    var matchingFromEl;
+
+	                    outer: while (curToNodeChild) {
+	                        toNextSibling = curToNodeChild.nextSibling;
+	                        curToNodeKey = getNodeKey(curToNodeChild);
+
+	                        while (curFromNodeChild) {
+	                            fromNextSibling = curFromNodeChild.nextSibling;
+
+	                            if (curToNodeChild.isSameNode && curToNodeChild.isSameNode(curFromNodeChild)) {
+	                                curToNodeChild = toNextSibling;
+	                                curFromNodeChild = fromNextSibling;
+	                                continue outer;
+	                            }
+
+	                            curFromNodeKey = getNodeKey(curFromNodeChild);
+
+	                            var curFromNodeType = curFromNodeChild.nodeType;
+
+	                            var isCompatible = undefined;
+
+	                            if (curFromNodeType === curToNodeChild.nodeType) {
+	                                if (curFromNodeType === ELEMENT_NODE) {
+	                                    // Both nodes being compared are Element nodes
+
+	                                    if (curToNodeKey) {
+	                                        // The target node has a key so we want to match it up with the correct element
+	                                        // in the original DOM tree
+	                                        if (curToNodeKey !== curFromNodeKey) {
+	                                            // The current element in the original DOM tree does not have a matching key so
+	                                            // let's check our lookup to see if there is a matching element in the original
+	                                            // DOM tree
+	                                            if (matchingFromEl = fromNodesLookup[curToNodeKey]) {
+	                                                if (curFromNodeChild.nextSibling === matchingFromEl) {
+	                                                    // Special case for single element removals. To avoid removing the original
+	                                                    // DOM node out of the tree (since that can break CSS transitions, etc.),
+	                                                    // we will instead discard the current node and wait until the next
+	                                                    // iteration to properly match up the keyed target element with its matching
+	                                                    // element in the original tree
+	                                                    isCompatible = false;
+	                                                } else {
+	                                                    // We found a matching keyed element somewhere in the original DOM tree.
+	                                                    // Let's moving the original DOM node into the current position and morph
+	                                                    // it.
+
+	                                                    // NOTE: We use insertBefore instead of replaceChild because we want to go through
+	                                                    // the `removeNode()` function for the node that is being discarded so that
+	                                                    // all lifecycle hooks are correctly invoked
+	                                                    fromEl.insertBefore(matchingFromEl, curFromNodeChild);
+
+	                                                    fromNextSibling = curFromNodeChild.nextSibling;
+
+	                                                    if (curFromNodeKey) {
+	                                                        // Since the node is keyed it might be matched up later so we defer
+	                                                        // the actual removal to later
+	                                                        addKeyedRemoval(curFromNodeKey);
+	                                                    } else {
+	                                                        // NOTE: we skip nested keyed nodes from being removed since there is
+	                                                        //       still a chance they will be matched up later
+	                                                        removeNode(curFromNodeChild, fromEl, true /* skip keyed nodes */);
+	                                                    }
+
+	                                                    curFromNodeChild = matchingFromEl;
+	                                                }
+	                                            } else {
+	                                                // The nodes are not compatible since the "to" node has a key and there
+	                                                // is no matching keyed node in the source tree
+	                                                isCompatible = false;
+	                                            }
+	                                        }
+	                                    } else if (curFromNodeKey) {
+	                                        // The original has a key
+	                                        isCompatible = false;
+	                                    }
+
+	                                    isCompatible = isCompatible !== false && compareNodeNames(curFromNodeChild, curToNodeChild);
+	                                    if (isCompatible) {
+	                                        // We found compatible DOM elements so transform
+	                                        // the current "from" node to match the current
+	                                        // target DOM node.
+	                                        morphEl(curFromNodeChild, curToNodeChild);
+	                                    }
+	                                } else if (curFromNodeType === TEXT_NODE || curFromNodeType == COMMENT_NODE) {
+	                                    // Both nodes being compared are Text or Comment nodes
+	                                    isCompatible = true;
+	                                    // Simply update nodeValue on the original node to
+	                                    // change the text value
+	                                    curFromNodeChild.nodeValue = curToNodeChild.nodeValue;
+	                                }
+	                            }
+
+	                            if (isCompatible) {
+	                                // Advance both the "to" child and the "from" child since we found a match
+	                                curToNodeChild = toNextSibling;
+	                                curFromNodeChild = fromNextSibling;
+	                                continue outer;
+	                            }
+
+	                            // No compatible match so remove the old node from the DOM and continue trying to find a
+	                            // match in the original DOM. However, we only do this if the from node is not keyed
+	                            // since it is possible that a keyed node might match up with a node somewhere else in the
+	                            // target tree and we don't want to discard it just yet since it still might find a
+	                            // home in the final DOM tree. After everything is done we will remove any keyed nodes
+	                            // that didn't find a home
+	                            if (curFromNodeKey) {
+	                                // Since the node is keyed it might be matched up later so we defer
+	                                // the actual removal to later
+	                                addKeyedRemoval(curFromNodeKey);
+	                            } else {
+	                                // NOTE: we skip nested keyed nodes from being removed since there is
+	                                //       still a chance they will be matched up later
+	                                removeNode(curFromNodeChild, fromEl, true /* skip keyed nodes */);
+	                            }
+
+	                            curFromNodeChild = fromNextSibling;
+	                        }
+
+	                        // If we got this far then we did not find a candidate match for
+	                        // our "to node" and we exhausted all of the children "from"
+	                        // nodes. Therefore, we will just append the current "to" node
+	                        // to the end
+	                        if (curToNodeKey && (matchingFromEl = fromNodesLookup[curToNodeKey]) && compareNodeNames(matchingFromEl, curToNodeChild)) {
+	                            fromEl.appendChild(matchingFromEl);
+	                            morphEl(matchingFromEl, curToNodeChild);
+	                        } else {
+	                            var onBeforeNodeAddedResult = onBeforeNodeAdded(curToNodeChild);
+	                            if (onBeforeNodeAddedResult !== false) {
+	                                if (onBeforeNodeAddedResult) {
+	                                    curToNodeChild = onBeforeNodeAddedResult;
+	                                }
+
+	                                if (curToNodeChild.actualize) {
+	                                    curToNodeChild = curToNodeChild.actualize(fromEl.ownerDocument || doc);
+	                                }
+	                                fromEl.appendChild(curToNodeChild);
+	                                handleNodeAdded(curToNodeChild);
+	                            }
+	                        }
+
+	                        curToNodeChild = toNextSibling;
+	                        curFromNodeChild = fromNextSibling;
+	                    }
+
+	                    // We have processed all of the "to nodes". If curFromNodeChild is
+	                    // non-null then we still have some from nodes left over that need
+	                    // to be removed
+	                    while (curFromNodeChild) {
+	                        fromNextSibling = curFromNodeChild.nextSibling;
+	                        if (curFromNodeKey = getNodeKey(curFromNodeChild)) {
+	                            // Since the node is keyed it might be matched up later so we defer
+	                            // the actual removal to later
+	                            addKeyedRemoval(curFromNodeKey);
+	                        } else {
+	                            // NOTE: we skip nested keyed nodes from being removed since there is
+	                            //       still a chance they will be matched up later
+	                            removeNode(curFromNodeChild, fromEl, true /* skip keyed nodes */);
+	                        }
+	                        curFromNodeChild = fromNextSibling;
+	                    }
+	                }
+
+	                var specialElHandler = specialElHandlers[fromEl.nodeName];
+	                if (specialElHandler) {
+	                    specialElHandler(fromEl, toEl);
+	                }
+	            } // END: morphEl(...)
+
+	            var morphedNode = fromNode;
+	            var morphedNodeType = morphedNode.nodeType;
+	            var toNodeType = toNode.nodeType;
+
+	            if (!childrenOnly) {
+	                // Handle the case where we are given two DOM nodes that are not
+	                // compatible (e.g. <div> --> <span> or <div> --> TEXT)
+	                if (morphedNodeType === ELEMENT_NODE) {
+	                    if (toNodeType === ELEMENT_NODE) {
+	                        if (!compareNodeNames(fromNode, toNode)) {
+	                            onNodeDiscarded(fromNode);
+	                            morphedNode = moveChildren(fromNode, createElementNS(toNode.nodeName, toNode.namespaceURI));
+	                        }
+	                    } else {
+	                        // Going from an element node to a text node
+	                        morphedNode = toNode;
+	                    }
+	                } else if (morphedNodeType === TEXT_NODE || morphedNodeType === COMMENT_NODE) {
+	                    // Text or comment node
+	                    if (toNodeType === morphedNodeType) {
+	                        morphedNode.nodeValue = toNode.nodeValue;
+	                        return morphedNode;
+	                    } else {
+	                        // Text node to something else
+	                        morphedNode = toNode;
+	                    }
+	                }
+	            }
+
+	            if (morphedNode === toNode) {
+	                // The "to node" was not compatible with the "from node" so we had to
+	                // toss out the "from node" and use the "to node"
+	                onNodeDiscarded(fromNode);
+	            } else {
+	                morphEl(morphedNode, toNode, childrenOnly);
+
+	                // We now need to loop over any keyed nodes that might need to be
+	                // removed. We only do the removal if we know that the keyed node
+	                // never found a match. When a keyed node is matched up we remove
+	                // it out of fromNodesLookup and we use fromNodesLookup to determine
+	                // if a keyed node has been matched up or not
+	                if (keyedRemovalList) {
+	                    for (var i = 0, len = keyedRemovalList.length; i < len; i++) {
+	                        var elToRemove = fromNodesLookup[keyedRemovalList[i]];
+	                        if (elToRemove) {
+	                            removeNode(elToRemove, elToRemove.parentNode, false);
+	                        }
+	                    }
+	                }
+	            }
+
+	            if (!childrenOnly && morphedNode !== fromNode && fromNode.parentNode) {
+	                if (morphedNode.actualize) {
+	                    morphedNode = morphedNode.actualize(fromNode.ownerDocument || doc);
+	                }
+	                // If we had to swap out the from node with a new node because the old
+	                // node was not compatible with the target node then we need to
+	                // replace the old DOM node in the original DOM tree. This is only
+	                // possible if the original DOM node was part of a DOM tree which
+	                // we know is the case if it has a parent node.
+	                fromNode.parentNode.replaceChild(morphedNode, fromNode);
+	            }
+
+	            return morphedNode;
+	        };
+	    }
+
+	    var morphdom = morphdomFactory(morphAttrs);
+	    morphdom.toElement = toElement;
+	    morphdom.toElements = toElements;
+	    return morphdom;
+	});
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports) {
 
 	"use strict";
 
@@ -1972,7 +2836,7 @@
 	    parseEndTag();
 
 	    function parseStartTag(tag, tagName, rest, unary) {
-	        tagName = tagName.toLowerCase();
+	        //tagName = tagName.toLowerCase();
 
 	        unary = !!unary;
 
@@ -2126,9 +2990,153 @@
 
 	exports["default"] = html2json;
 
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 10 */
+/***/ (function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Store = function () {
+	    function Store(isReady) {
+	        _classCallCheck(this, Store);
+
+	        this.readyHandlers = [];
+	        this.isReady = isReady;
+	        this.instances = [];
+	        this.updateSelfInstances = [];
+	    }
+
+	    _createClass(Store, [{
+	        key: "ready",
+	        value: function ready(readyHandler) {
+	            if (this.isReady) {
+	                readyHandler();
+	                return;
+	            }
+	            this.readyHandlers.push(readyHandler);
+	        }
+	    }, {
+	        key: "addSelfView",
+	        value: function addSelfView(view) {
+	            var added = false;
+
+	            for (var i = 0, len = this.updateSelfInstances.length; i < len; i++) {
+	                if (this.updateSelfInstances[i].id === view.id) {
+	                    added = true;
+	                    break;
+	                }
+	            }
+	            if (!added) {
+	                this.updateSelfInstances.push(view);
+	            }
+	        }
+	    }, {
+	        key: "addView",
+	        value: function addView(view) {
+	            var added = false;
+
+	            for (var i = 0, len = this.instances.length; i < len; i++) {
+	                if (this.instances[i].id === view.id) {
+	                    added = true;
+	                    break;
+	                }
+	            }
+	            if (!added) {
+	                this.instances.push(view);
+	            }
+	        }
+	    }, {
+	        key: "beReady",
+	        value: function beReady() {
+	            this.isReady = true;
+	            this.readyHandlers.forEach(function (handler) {
+	                return handler();
+	            });
+	        }
+	    }, {
+	        key: "update",
+	        value: function update() {
+	            this._mergeInstances();
+	            this._mergeSelfInstances();
+	            this.instances.forEach(function (instance) {
+	                return instance.update();
+	            });
+	            this.updateSelfInstances.forEach(function (instance) {
+	                return instance.updateSelf();
+	            });
+	        }
+	    }, {
+	        key: "_mergeSelfInstances",
+	        value: function _mergeSelfInstances() {
+	            var _this = this;
+
+	            var arr = [];
+	            this.updateSelfInstances.forEach(function (instance) {
+	                if (!_this._checkSelfUpdateInstance(instance)) {
+	                    arr.push(instance);
+	                }
+	            });
+	            this.updateSelfInstances = arr;
+	        }
+	    }, {
+	        key: "_mergeInstances",
+	        value: function _mergeInstances() {
+	            var _this2 = this;
+
+	            var arr = [];
+	            this.idArr = [];
+	            this.instances.forEach(function (instance) {
+	                _this2.idArr.push(instance.id);
+	            });
+
+	            this.instances.forEach(function (instance) {
+	                if (!instance.parent) {
+	                    arr.push(instance);
+	                } else {
+	                    if (!_this2._isSubInstance(instance)) {
+	                        arr.push(instance);
+	                    }
+	                }
+	            });
+
+	            this.instances = arr;
+	        }
+	    }, {
+	        key: "_checkSelfUpdateInstance",
+	        value: function _checkSelfUpdateInstance(instance) {
+	            if (this.idArr.indexOf(instance.id) !== -1) {
+	                return true;
+	            } else if (instance.parent) {
+	                return this._checkSelfUpdateInstance(instance.parent);
+	            }
+	        }
+	    }, {
+	        key: "_isSubInstance",
+	        value: function _isSubInstance(instance) {
+	            if (this.idArr.indexOf(instance.parent.id) !== -1) {
+	                return true;
+	            } else if (instance.parent.parent) {
+	                return this._isSubInstance(instance.parent);
+	            }
+	        }
+	    }]);
+
+	    return Store;
+	}();
+
+	exports["default"] = Store;
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -2160,7 +3168,7 @@
 	            total: 0,
 	            pageSize: 10,
 	            numDisplay: 10,
-	            currentPage: 3,
+	            currentPage: 0,
 	            numEdge: 0,
 	            linkTo: "#",
 	            prevText: "Prev",
@@ -2176,8 +3184,8 @@
 	    }
 
 	    _createClass(Pagination, [{
-	        key: "install",
-	        value: function install() {
+	        key: "beforeRender",
+	        value: function beforeRender() {
 	            this.pageNum = Math.ceil(this.data.total / this.data.pageSize);
 	        }
 	    }, {
@@ -2185,7 +3193,6 @@
 	        value: function goto(index, evt) {
 	            evt.preventDefault();
 	            this.data.currentPage = index;
-	            this.update();
 	            this.data.onPageChange(index);
 	        }
 	    }, {
@@ -2274,9 +3281,9 @@
 
 	exports["default"] = Pagination;
 
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -2304,14 +3311,16 @@
 	    function Content(data) {
 	        _classCallCheck(this, Content);
 
-	        return _possibleConstructorReturn(this, (Content.__proto__ || Object.getPrototypeOf(Content)).call(this, data));
+	        var _this = _possibleConstructorReturn(this, (Content.__proto__ || Object.getPrototypeOf(Content)).call(this, data));
+
+	        _this.data.index = 0;
+	        return _this;
 	    }
 
 	    _createClass(Content, [{
 	        key: 'goto',
 	        value: function goto(index) {
 	            this.data.index = index;
-	            this.update();
 	        }
 	    }, {
 	        key: 'style',
@@ -2330,5 +3339,5 @@
 
 	exports['default'] = Content;
 
-/***/ }
+/***/ })
 /******/ ]);

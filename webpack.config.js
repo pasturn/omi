@@ -1,6 +1,6 @@
 var path = require('path');
 var webpack = require('webpack');
-
+var packageJSON = require('./package.json');
 /**
  * Env
  * Get npm lifecycle event to identify the environment
@@ -41,11 +41,13 @@ var config  = {
     // devtool: 'source-map',
 };
 
-if(ENV === 'build'){
+if(ENV === 'build'||ENV === 'build-min'){
     config = {
         entry: {
             omi: './src/index.js',
-            'omi.lite': './src/index.lite.js'
+            'omi.lite': './src/index.lite.js',
+            'omi.mustache': './src/index.mustache.js',
+            'omi.art': './src/index.art.js'
         },
         output: {
             // path: __dirname,
@@ -72,7 +74,7 @@ if(ENV === 'build'){
         },
         plugins: [
             // Avoid publishing files when compilation fails
-            new webpack.BannerPlugin(" Omi v0.3.3 By dntzhang \r\n Github: https://github.com/AlloyTeam/omi\r\n MIT Licensed."),
+            new webpack.BannerPlugin(" Omi v"+packageJSON.version+" By dntzhang \r\n Github: https://github.com/AlloyTeam/omi\r\n MIT Licensed."),
             new webpack.NoErrorsPlugin()
         ],
         stats: {
@@ -82,15 +84,29 @@ if(ENV === 'build'){
         // Create Sourcemaps for the bundle
        // devtool: 'source-map',
     };
-}else if(ENV === 'website') {
-    config.entry ={
-        bundler: './website/js/docs_main.js',
-        bundler_en: './website/js/docs_main_en.js'
+
+     if(ENV === 'build-min'){
+        config.plugins.push(new webpack.optimize.UglifyJsPlugin({
+            compress: {
+                warnings: false,
+                screw_ie8 : false
+            },
+            mangle: {
+                screw_ie8: false
+            },
+            output: { screw_ie8: false }
+        }));
+        config.entry = {
+            'omi.min': './src/index.js',
+            'omi.lite.min': './src/index.lite.js',
+            'omi.mustache.min': './src/index.mustache.js',
+            'omi.art.min': './src/index.art.js'
+        };
     }
-    config.output.path = './website/dist/';
-    config.output.filename =  '[name].js';
-    config.module.loaders.push(  { test: /\.md$/, loader: "md-text" });
-}else {
+}else if(ENV==='todomvc'){
+    config.entry = './' + ENV + '/js/main.js';
+    config.output.path = './' + ENV + '/';
+}else{
     config.entry = './example/' + ENV + '/main.js';
     config.output.path = './example/' + ENV + '/';
 }

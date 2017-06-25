@@ -1,14 +1,18 @@
-var Omi = {};
-Omi.instances =  {};
-Omi._instanceId = 0;
+ï»¿var Omi = {}
+Omi.instances =  {}
+Omi._instanceId = 0
 Omi.getInstanceId = function () {
-    return Omi._instanceId++;
-};
-Omi.customTags = [];
-Omi.mapping = {};
+    return Omi._instanceId++
+}
+Omi.customTags = []
+Omi.mapping = {}
 
-Omi.STYLEPREFIX = "omi_style_";
-Omi.STYLESCOPEDPREFIX = "omi_scoped_";
+Omi.STYLEPREFIX = "omi_style_"
+Omi.STYLESCOPEDPREFIX = "omi_scoped_"
+
+Omi.style = { }
+
+Omi.componentConstructor = { }
 
 //fix ie bug
 if (typeof Object.assign != 'function') {
@@ -108,155 +112,205 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function toArr(obj) {
-    let arr = [];
+    let arr = []
     for (let key in obj) {
         if (obj.hasOwnProperty(key)) {
-            arr.push({key: key, value: obj[key]});
+            arr.push({key: key, value: obj[key]})
         }
     }
-    return arr;
+    return arr
 }
 
 Omi.create = function(tagName ,parent,setting) {
     let u_setting = parent,
-        u_parent = Omi.Component;
+        u_parent = Omi.Component
     if (arguments.length > 2) {
-        u_setting = setting;
-        u_parent = parent;
+        u_setting = setting
+        u_parent = parent
     }
-    Omi[tagName] = function (parent) {
-        _inherits(Obj, parent);
+    Omi.componentConstructor[tagName] = function (parent) {
+        _inherits(Obj, parent)
 
         function Obj(data, server) {
-            _classCallCheck(this, Obj);
-            this.___omi_constructor_name = tagName;
-            return _possibleConstructorReturn(this, (Obj.__proto__ || Object.getPrototypeOf(Obj)).call(this, data,server));
+            _classCallCheck(this, Obj)
+            this.___omi_constructor_name = tagName
+            return _possibleConstructorReturn(this, (Obj.__proto__ || Object.getPrototypeOf(Obj)).call(this, data,server))
         }
 
-        _createClass(Obj, toArr(u_setting));
+        _createClass(Obj, toArr(u_setting))
 
-        return Obj;
-    }(u_parent);
+        return Obj
+    }(u_parent)
 
-    Omi.customTags.push(tagName);
+    Omi.customTags.push(tagName)
 
-    return Omi[tagName];
+    return Omi.componentConstructor[tagName]
+}
+
+Omi.createStore = function(option) {
+
+    let Store = function (parent) {
+        _inherits(Obj, parent)
+
+        function Obj(data, isReady) {
+            _classCallCheck(this, Obj)
+            this.data = data
+            option.methods.install && option.methods.install.call(this)
+            return _possibleConstructorReturn(this, (Obj.__proto__ || Object.getPrototypeOf(Obj)).call(this, data, isReady))
+        }
+
+        _createClass(Obj, toArr(option.methods))
+
+        return Obj
+    }(Omi.Store)
+
+    return new Store(option.data, true)
 }
 
 Omi.mixIndex = function(array, key) {
     const len = array.length,
-        indexName = key || "index";
+        indexName = key || "index"
     for (let i = 0; i < len; i++) {
-        var item = array[i];
+        var item = array[i]
         if (typeof item === "object") {
-            item[indexName] = i;
+            item[indexName] = i
         } else {
-            array[i] = {value: item};
-            array[i][indexName] = i;
+            array[i] = {value: item}
+            array[i][indexName] = i
         }
     }
-    return array;
+    return array
 }
 
 Omi.$ = function(selector,context){
     if(context){
-        return context.querySelector(selector);
+        return context.querySelector(selector)
     }else{
-        return document.querySelector(selector);
+        return document.querySelector(selector)
     }
 }
 
 Omi.$$ = function(selector,context){
     if(context){
-        return  Array.prototype.slice.call(context.querySelectorAll(selector));
+        return  Array.prototype.slice.call(context.querySelectorAll(selector))
     }else{
-        return Array.prototype.slice.call(document.querySelectorAll(selector));
+        return Array.prototype.slice.call(document.querySelectorAll(selector))
     }
 }
 
 Omi.getClassFromString = function(str) {
-    if (str.indexOf('.') !== 0) {
-        let arr = str.split('.');
-        const len = arr.length;
-        let current = Omi[arr[0]];
+    if (str.indexOf('.') !== -1) { //root is window
+        let arr = str.split('.')
+        const len = arr.length
+        let current = window[arr[0]]
         for (let i = 1; i < len; i++) {
-            current = current[arr[i]];
+            current = current[arr[i]]
         }
-        return current;
+        return current
     } else {
-        return Omi[str];
+        return Omi.componentConstructor[str]
     }
 }
 
-//ÒÔÇ°ÊÇComponentµÄ¾²Ì¬·½·¨£¬ÒÆµ½omiÏÂÀ´£¬²»È»makehtml ÔÚieÏÂchild·ÃÎÊ²»µ½¸¸Ç×µÄ¾²Ì¬·½·¨
-Omi.makeHTML= function(name , ctor) {
-    Omi[name] = ctor;
-    Omi.customTags.push(name);
+
+//ä»¥å‰æ˜¯Componentçš„é™æ€æ–¹æ³•ï¼Œç§»åˆ°omiä¸‹æ¥ï¼Œä¸ç„¶makehtml åœ¨ieä¸‹childè®¿é—®ä¸åˆ°çˆ¶äº²çš„é™æ€æ–¹æ³•
+Omi.makeHTML= function(name, ctor) {
+    Omi.componentConstructor[name] = ctor
+    Omi.componentConstructor[name.toLowerCase()] = ctor
+    Omi.customTags.push(name, name.toLowerCase())
+    if(document.documentMode < 9){
+        document.createElement(name.toLowerCase());
+    }
 }
 
-Omi.render = function(component , renderTo , increment){
-    component.renderTo = typeof renderTo === "string" ? document.querySelector(renderTo) : renderTo;
-    component._omi_increment = increment;
-    component.install();
-    component._render(true);
-    component.installed();
-    component._childrenInstalled(component);
-    return component;
+Omi.tag = Omi.makeHTML
+
+Omi.render = function(component , renderTo , incrementOrOption){
+    component.renderTo = typeof renderTo === "string" ? document.querySelector(renderTo) : renderTo
+    if(typeof incrementOrOption === 'boolean') {
+        component._omi_increment = incrementOrOption
+    }else if(incrementOrOption){
+        component._omi_increment = incrementOrOption.increment
+        if( incrementOrOption.store) {
+            if(incrementOrOption.store instanceof Omi.Store){
+                component.$store = incrementOrOption.store
+            }else{
+                component.$store = Omi.createStore(incrementOrOption.store)
+            }
+        }
+        component._omi_autoStoreToData = incrementOrOption.autoStoreToData
+    }
+    component.install()
+    component._render(true)
+    component._childrenInstalled(component)
+    component.installed()
+    component._execInstalledHandlers()
+    return component
 }
 
 Omi.get = function(name){
-    return Omi.mapping[name];
+    return Omi.mapping[name]
 }
 
-Omi.plugins ={};
+Omi.plugins ={}
 
 Omi.extendPlugin = function(name, handler) {
-    Omi.plugins[name] = handler;
+    Omi.plugins[name] = handler
 }
 
 Omi.getParameters = function(dom, instance, types){
-    let data = { };
-    let noop = function(){ };
+    let data = { }
+    let noop = function(){ }
     let methodMapping = {
         stringType : value =>{
-            return value;
+            return value
         },
         numberType: value =>{
-            return Number(value);
+            return Number(value)
         },
         booleanType: value => {
             if (value === 'true') {
-                return true;
+                return true
             } else if (value === 'false') {
-                return false;
+                return false
             } else {
-                return Boolean(value);
+                return Boolean(value)
             }
         },
         functionType: value => {
             if (value) {
                 let handler = instance[value.replace(/Omi.instances\[\d\]./, '')]
                 if (handler) {
-                    return handler.bind(instance);
+                    return handler.bind(instance)
                 } else {
-                    console.warn('You do not define [ '+value+' ] method in following component');
-                    console.warn(instance);
+                    console.warn('You do not define [ '+value+' ] method in following component')
+                    console.warn(instance)
                 }
             } else {
-                return noop;
+                return noop
             }
         }
-    };
+    }
     Object.keys(types).forEach(type => {
         types[type].forEach(name => {
-            let attr =  dom.getAttribute(name);
+            let attr =  dom.getAttribute(name)
             if(attr !== null) {
-                data[name] = methodMapping[type](attr);
+                data[name] = methodMapping[type](attr)
             }
         } )
-    });
+    })
 
-    return data;
+    return data
 }
 
-module.exports = Omi;
+Omi.mixIndexToArray = function(arr ,indexName){
+    arr.forEach((item , index)=>{
+       item[indexName||'index'] =  index
+    })
+}
+
+Omi.deletePlugin = function(name){
+    delete Omi.plugins[name]
+}
+
+module.exports = Omi

@@ -17,8 +17,7 @@
     };
 
     var getHandler = function(name, dom, instance) {
-        var evtName ='on'+ name.substring(0, 1).toUpperCase() + name.substring(1);
-        var value = dom.getAttribute(evtName);
+        var value = dom.getAttribute(name);
         if (value === null) {
             return noop;
         }else{
@@ -63,10 +62,6 @@
             })
         });
     }
-
-    OmiTouch.destroy = function(){
-        delete Omi.plugins['omi-touch'];
-    };
 
     if (typeof exports == "object") {
         module.exports = OmiTouch;
